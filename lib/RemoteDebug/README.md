@@ -7,12 +7,13 @@ with Print commands like Serial Monitor.
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/RemoteDebug.svg?)](https://www.ardu-badge.com/RemoteDebug)
 [![GitHub release](https://img.shields.io/github/release/JoaoLopesF/RemoteDebug.svg)](#releases)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3eadfd19246f4808907cf53599a6b9f0)](https://www.codacy.com/app/JoaoLopesF/RemoteDebug?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JoaoLopesF/RemoteDebug&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3eadfd19246f4808907cf53599a6b9f0)](https://www.codacy.com/app/JoaoLopesF/RemoteDebug?utm_source=github.com&utm_medium=referral&utm_content=JoaoLopesF/RemoteDebug&utm_campaign=Badge_Grade)
 [![platform badge](https://img.shields.io/badge/platform-Arduino|Espressif-orange.svg)](https://github.com/arduino)
 [![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/JoaoLopesF/RemoteDebug/blob/master/LICENSE.txt)  
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](#github)
 [![GitHub issues](https://img.shields.io/github/issues/JoaoLopesF/RemoteDebug.svg)](http://github.com/JoaoLopesF/RemoteDebug/issues)
 [![star this repo](http://githubbadges.com/star.svg?user=JoaoLopesF&repo=RemoteDebug)](http://github.com/JoaoLopesF/RemoteDebug)
+
 <!-- ![build badge](https://img.shields.io/github/stars/JoaoLopesF/RemoteDebug.svg?style=social) -->
 
 ![remotedebugapp](extras/readme_media/remotedebugapp.png)
@@ -56,17 +57,17 @@ and these were far from each other. One was hard to reach, under the roof of the
 To debug this project, accompanying the exchange of messages in realtime,
 is impossible to do with traditional way, by USB cable.
 
-The MiP_ESP8266_Library and my ESP32 WiFi robot are example of projects that uses __RemoteDebug__.
-See it in:  [MiP_ESP8266_Library](https://github.com/Tiogaplanet/MiP_ESP8266_Library) and [ESPlorer_v1](https://github.com/JoaoLopesF/ESPlorer_v1)
+The MiP_ESP8266_Library and my ESP32 WiFi robot are example of projects that uses **RemoteDebug**.
+See it in: [MiP_ESP8266_Library](https://github.com/Tiogaplanet/MiP_ESP8266_Library) and [ESPlorer_v1](https://github.com/JoaoLopesF/ESPlorer_v1)
 
-__RemoteDebug__ is improved with client buffering (is last send is <= 10ms),
+**RemoteDebug** is improved with client buffering (is last send is <= 10ms),
 to avoid mysterious delays of WiFi networking on ESP32 and ESP8266 boards
 
 Note: If your project not use WiFi, you can use my another library,
-the __[SerialDebug](https://github.com/JoaoLopesF/SerialDebug)__ library, 
+the **[SerialDebug](https://github.com/JoaoLopesF/SerialDebug)** library,
 this library works with any Arduino board.
 
-Note II: __RemoteDebug__ library is now only to Espressif boards, as ESP32 and ESP8266,
+Note II: **RemoteDebug** library is now only to Espressif boards, as ESP32 and ESP8266,
 If need for another WiFi boards, please add an issue about this
 and we will see if it is possible made the port for your board.
 
@@ -122,141 +123,141 @@ Please add an issue for problems or suggestion.
 
 - Version 2.1.1
 
-  - Now __RemoteDebug__ have a code converter, for help you to convert your codes:
+  - Now **RemoteDebug** have a code converter, for help you to convert your codes:
     to do it, please access the [RemoteDebugConverter](https://github.com/JoaoLopesF/RemoteDebugConverter)
 
 - Version 2.0.0
 
-  - Now __RemoteDebug__ can have the same simple software debugger, that __SerialDebug__ library have.
-    This is done, installing another library, the __[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)__
-    The __RemoteDebugger__ act as an add on to __RemoteDebug__.
-    To support this addon, the changes in __RemoteDebug__, is minimum, just a few callbacks
+  - Now **RemoteDebug** can have the same simple software debugger, that **SerialDebug** library have.
+    This is done, installing another library, the **[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)**
+    The **RemoteDebugger** act as an add on to **RemoteDebug**.
+    To support this addon, the changes in **RemoteDebug**, is minimum, just a few callbacks
     It is done to no add extra overhead to projects that no need an debugger.
-    To more informations please access the __[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)__ github repository.
+    To more informations please access the **[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)** github repository.
 
-  - Now __RemoteDebug__ have a new color system, using more colors, as done in __SerialDebugApp__
+  - Now **RemoteDebug** have a new color system, using more colors, as done in **SerialDebugApp**
 
-   Note: due the __RemoteDebug__ library, is migrate to Arduino 1.5 format, with folder "src",
-         please delete and reinstall the library to avoid duplication of RemoteDebug sources files.
+  Note: due the **RemoteDebug** library, is migrate to Arduino 1.5 format, with folder "src",
+  please delete and reinstall the library to avoid duplication of RemoteDebug sources files.
 
-- Version 1.5.*
+- Version 1.5.\*
 
-    In 1.5.0 version, we have debug* and rdebug* macros (see below), that put automatically,
-    the name of function that called, and core id (core id is only for ESP32)
+  In 1.5.0 version, we have debug* and rdebug* macros (see below), that put automatically,
+  the name of function that called, and core id (core id is only for ESP32)
 
 ## Benefits
 
-__SerialDebug__ is better than Arduino default debugging by Serial.print commands:
+**SerialDebug** is better than Arduino default debugging by Serial.print commands:
 
-### This is more __optimized__
+### This is more **optimized**
 
-  Being or not debugging via USB cable,
-  the Serial.print command allways is processed,
-  waste CPU time on microcontroller.
-  In other words, the debug commands are processed,
-  with someone connected in the serial or not.  
-  
-  With __RemoteDebug__, all debug output is processed only
-  if exists anyone debugging via telnet or web app connection.
+Being or not debugging via USB cable,
+the Serial.print command allways is processed,
+waste CPU time on microcontroller.
+In other words, the debug commands are processed,
+with someone connected in the serial or not.
 
-  And with the debug levels of resource, the volume displayed
-  of messages are reduced for higher levels.
-  For example, only process all messages,
-  if the level is the lowest, the verbose,
+With **RemoteDebug**, all debug output is processed only
+if exists anyone debugging via telnet or web app connection.
 
-  __RemoteDebug__ is otimized to reduce overheads,
-  in CPU and memory and include client buffering feature.
+And with the debug levels of resource, the volume displayed
+of messages are reduced for higher levels.
+For example, only process all messages,
+if the level is the lowest, the verbose,
 
-### Have __debug levels__
+**RemoteDebug** is otimized to reduce overheads,
+in CPU and memory and include client buffering feature.
 
-  During the development, we can put a lot of debug messages...
+### Have **debug levels**
 
-  But with __RemoteDebug__, we can put a level in each one.
+During the development, we can put a lot of debug messages...
 
-  For all messages (except levels always (debugA) or error (debugE),
-  the message only is processed and showed,
-  if debug level is equal or higher than it level
+But with **RemoteDebug**, we can put a level in each one.
 
-  __RemoteDebug__ have 6 debug levels, in order of priority:
+For all messages (except levels always (debugA) or error (debugE),
+the message only is processed and showed,
+if debug level is equal or higher than it level
 
-  Alway showed:
+**RemoteDebug** have 6 debug levels, in order of priority:
 
-   __Error__:    Critical errors
+Alway showed:
 
-   __Always__:   Important messages
+**Error**: Critical errors
 
-  Another levels (showed if level is equal or higher that actual one):
+**Always**: Important messages
 
-   __Warning__:  Error conditions but not critical
+Another levels (showed if level is equal or higher that actual one):
 
-   __Info__:     Information messages
+**Warning**: Error conditions but not critical
 
-   __Debug__:    Extra information
+**Info**: Information messages
 
-   __Verbose__:  More information than the usual  
+**Debug**: Extra information
 
-  So We can change the level to verbose, to see all messages.
-  Or to debug to see only debug or higher level, etc.
+**Verbose**: More information than the usual
 
-  Is very good to reduce a quantity of messages that a project can generate,
-  to help debugging.
+So We can change the level to verbose, to see all messages.
+Or to debug to see only debug or higher level, etc.
 
-### It is __easy__ to migrate
+Is very good to reduce a quantity of messages that a project can generate,
+to help debugging.
 
-  __RemoteDebug__ have a converter to help migrate your Arduino codes,
-  from Serial.prints to this library.
+### It is **easy** to migrate
 
-  [RemoteDebugConverter](https://github.com/JoaoLopesF/RemoteDebugConverter)
+**RemoteDebug** have a converter to help migrate your Arduino codes,
+from Serial.prints to this library.
 
-  Even if you want to do this manually, it's very simple. Please see topic [Using](#usage) above.
+[RemoteDebugConverter](https://github.com/JoaoLopesF/RemoteDebugConverter)
 
-### Have __auto__ function name and simple __profiler__
+Even if you want to do this manually, it's very simple. Please see topic [Using](#usage) above.
 
-  A simple debug:
+### Have **auto** function name and simple **profiler**
 
-  ```cpp
-  debugV("* Run time: %02u:%02u:%02u (VERBOSE)", mRunHours, mRunMinutes, mRunSeconds);
-  ````
+A simple debug:
 
-  Can generate this output in serial monitor:
+```cpp
+debugV("* Run time: %02u:%02u:%02u (VERBOSE)", mRunHours, mRunMinutes, mRunSeconds);
+```
+
+Can generate this output in serial monitor:
 
         (V p:3065 loop C1) * Run time: 00:41:23 (VERBOSE)
-  
+
         Where:  V: is the level
                 p: is a profiler time, elased, between this and previous debug
                 loop: is a function name, that executed this debug
                 C1: is a core that executed this debug (and a function of this) (only for ESP32)
                 The remaining is the message formatted (printf)
 
-  For ESP32, the core id in each debug is very good to optimizer multicore programming.
+For ESP32, the core id in each debug is very good to optimizer multicore programming.
 
-### Have __commands__ to execute from telnet or web app
+### Have **commands** to execute from telnet or web app
 
-  For example:
+For example:
 
-- Show help (__?__)
-- Change the level of debug (__v__,__d__,__i__,__w__,__e__),
-   to show less or more messages.
-- See memory (__m__)
-- Reset the board (__reset__)
+- Show help (**?**)
+- Change the level of debug (**v**,**d**,**i**,**w**,**e**),
+  to show less or more messages.
+- See memory (**m**)
+- Reset the board (**reset**)
 
-   See about __RemoteDebug__ commands below.
+  See about **RemoteDebug** commands below.
 
-   You can add your own commands, see the examples please
+  You can add your own commands, see the examples please
 
-   If your project have __[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)__ installed,
-   have a new commands, e.g. call a function, see/change variables, ...
+  If your project have **[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)** installed,
+  have a new commands, e.g. call a function, see/change variables, ...
 
-### Have a simple __software debugger__
+### Have a simple **software debugger**
 
-  Now __RemoteDebug__ (version >= 2.0.0), have an simple software debuggger,
-  based in codes of SerialDebug library.
+Now **RemoteDebug** (version >= 2.0.0), have an simple software debuggger,
+based in codes of SerialDebug library.
 
-  This is another library, that act as an addon to __RemoteDebug__.
+This is another library, that act as an addon to **RemoteDebug**.
 
-  Please acess the RemoteDebugger repository to more informations: __[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)__
+Please acess the RemoteDebugger repository to more informations: **[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)**
 
-### Ready for __production__ (release compiler)
+### Ready for **production** (release compiler)
 
     For release your device, just uncomment DEBUG_DISABLED in your project
     Done this, and no more debug processing.
@@ -307,18 +308,18 @@ is supported on all operating systems (Windows, Mac, Linux...).
 
 MacOSx and Linux have a native telnet client.
 
-For Windows, a typical telnet client is the __Putty__: [putty](https://www.putty.org/) .
+For Windows, a typical telnet client is the **Putty**: [putty](https://www.putty.org/) .
 
-Have a good tool for mobiles: the __Fing__, please find it in your mobile store.
+Have a good tool for mobiles: the **Fing**, please find it in your mobile store.
 Its show all devices in local network (WiFi), show ports opened and can execute the telnet client too (external App)
 
-__RemoteDebug__  sets-up a telnet server which is listening to any telnet client that wants to connect. After connection, logging is streamed to the telnet client.
+**RemoteDebug** sets-up a telnet server which is listening to any telnet client that wants to connect. After connection, logging is streamed to the telnet client.
 
-__RemoteDebug__ is very simple to use, after a few lines of initialization code, you can use the well-known "print" commands to stream your logging to the remote client.
+**RemoteDebug** is very simple to use, after a few lines of initialization code, you can use the well-known "print" commands to stream your logging to the remote client.
 
 ### Debug levels
 
-__RemoteDebug__ supports the filtering of logging based on __debug levels__:
+**RemoteDebug** supports the filtering of logging based on **debug levels**:
 
 Only show for it actual debug level:
 
@@ -340,7 +341,7 @@ The telnet client or web app can set the debug level by typing a few simple comm
 
 ### Profiler
 
-__RemoteDebug__ includes a simple profiler. It can be enabled by the connected client (telnet or web app)
+**RemoteDebug** includes a simple profiler. It can be enabled by the connected client (telnet or web app)
 or the Arduino code itself.
 
 When enabled, it shows the time between 2 debug statements, using different colors depending on the elapsed time.
@@ -349,21 +350,21 @@ A typical example would be to insert logging just before and after a function af
 
 ### Lightweight
 
-__RemoteDebug__ is designed to give minimal overhead (connected or not) and
+**RemoteDebug** is designed to give minimal overhead (connected or not) and
 only process debugs,if there is a client (telnet or web app) connected.
 
 ### Custom commands
 
-__RemoteDebug__ supports custom commands that can be entered in the client (telnet or web app).
- These trigger the execution of a custom function in the Arduino code. For example this can be used to send back a status on request of the client.
+**RemoteDebug** supports custom commands that can be entered in the client (telnet or web app).
+These trigger the execution of a custom function in the Arduino code. For example this can be used to send back a status on request of the client.
 
 ### DISCLAIMER
 
-The current version of __RemoteDebug__ does not yet include any encrypted authentication,
+The current version of **RemoteDebug** does not yet include any encrypted authentication,
 only plain text and is intended only for development, not use in production/release.
 
 Future versions, if is possible, will include a secure way for authentication and further testing to support production environments.
-  
+
 ## Wishlist
 
     - An app to RemoteDebug like SerialDebug have.
@@ -375,13 +376,15 @@ Future versions, if is possible, will include a secure way for authentication an
 Just download or clone this repository.
 
 Or for Arduino IDE, you can use the library manager to install and update the library.
+
 <!-- For install help, please see: [https://www.arduino.cc/en/Guide/Libraries](https://www.arduino.cc/en/Guide/Libraries) -->
+
 For install help, please click on this: [![arduino-library-badge](https://www.ardu-badge.com/badge/RemoteDebug.svg?)](https://www.ardu-badge.com/RemoteDebug)
 
 <!--![install](extras/readme_media/install.png)-->
 
 For another IDE, or not using the library manager of Arduino IDE,
-I suggest you use a [Github Desktop](https://desktop.github.com/) app  to clone,it help to keep updated.
+I suggest you use a [Github Desktop](https://desktop.github.com/) app to clone,it help to keep updated.
 
 Please open the projects in example folder, to see it working.
 
@@ -419,7 +422,7 @@ Debug.setResetCmdEnabled(true); // Enable the reset command
 ```
 
 Note: to enable the debugger, by RemoteDebugger, please acess this github repository:
-__[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)__
+**[RemoteDebugger](https://github.com/JoaoLopesF/RemoteDebugger)**
 
 In the tail of loop function
 
@@ -451,7 +454,7 @@ if (Debug.isActive(Debug.<level>)) {
 ```
 
 Note: Using isActive, you need surround the code by DEBUG_DISABLE precompile condition,
-      to avoid compile it for production/release
+to avoid compile it for production/release
 
 Or short way (equal to SerialDebug) (prefered if only one debug at time):
 
@@ -478,7 +481,7 @@ Serial.print(" c = ");
 Serial.println(c);
 ```
 
-can be use rdebug* macros:
+can be use rdebug\* macros:
 
 ```cpp
 rdebugV("a = ");
@@ -545,14 +548,14 @@ Debug.setSerialEnabled(true); // All messages too send to serial too, and can be
 For reduce overheads RemoteDebug is disconnect the client (telnet or web app), if it not active.
 
     - Please press enter or any key if you need keep the connection
-    - The default is 5 minutes (You can change it in RemoteDebug.h)  
+    - The default is 5 minutes (You can change it in RemoteDebug.h)
     - You can use mDNS to register each node with different name, it helps to connect without know the IP.
 
 Please not forget to use if clause with Debug.isActive (if not using debug macros)
 
     ---> This is very important to reduce overheads and work of debug levels
 
-Please see the samples, basic or advanced, to learn how to use  
+Please see the samples, basic or advanced, to learn how to use
 
 In advanced sample, I used WifiManager library, ArduinoOTA and mDNS, please see it.
 
@@ -653,7 +656,7 @@ In advanced sample, I used WifiManager library, ArduinoOTA and mDNS, please see 
 ### 1.5.1 - 2018-08-28
 
     - New silent mode (command s)
-  
+
 ### 1.5.0 - 2018-08=26
 
     - Auto function name and ESP32 core id for rdebug* macros
