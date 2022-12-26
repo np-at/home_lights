@@ -3,6 +3,7 @@
 #include <FastLED.h>
 #include "globals.h"
 #include "solid.h"
+#include "breathe.h"
 #include "comet.h"
 #include "twinkle.h"
 #include "mqtt_com.h"
@@ -35,6 +36,7 @@ const char* sensorName = "sensor";
 static SolidEffect* solidEffect;
 static TwinkleLightEffect* twinkleLightEffect;
 static CometLightEffect* cometLightEffect;
+static BreatheEffect* breatheEffect;
 
 void setup() {
     // Setup LEDs
@@ -44,6 +46,8 @@ void setup() {
     solidEffect = &solid;
     static auto twinkle = TwinkleLightEffect();
     twinkleLightEffect = &twinkle;
+    static auto breathe = BreatheEffect();
+    breatheEffect = &breathe;
     pinMode(LED_PIN, OUTPUT);
 #ifdef DEBUGENABLE
 
@@ -164,6 +168,11 @@ void loop() {
                 if (isTransitioning)
                     isTransitioning = solidEffect->handleDiff_step(&desiredState, &currentState);
                 solidEffect->DrawEffect(&currentState);
+                break;
+            case LightEffect::BREATHE:
+                if (isTransitioning)
+                    isTransitioning = breatheEffect->handleDiff_step(&desiredState, &currentState);
+                breatheEffect->DrawEffect(&currentState);
                 break;
             default:
                 break;

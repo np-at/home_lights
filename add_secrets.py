@@ -2,17 +2,26 @@ import json
 import shutil
 import subprocess
 import warnings
+import os
+from time import sleep
 
 Import("env")
 
-import os
 
 pioenv = env["PIOENV"]
 print(f"pio env is {pioenv}")
 
-secrets_file = os.environ.get("PIO_SECRETS_FILE_PATH")
+# secrets_file = os.environ.get("PIO_SECRETS_FILE_PATH")
+secrets_file = "secrets.json"
 secrets: dict
-if not secrets_file:
+if secrets_file:
+    try:
+        with open(secrets_file, "r", encoding="utf-8") as f:
+            secrets = json.load(f).get(pioenv)
+    except Exception as e:
+        print(e)
+        raise
+else:
     op_executable = shutil.which("op")
     if op_executable is not None:
         try:
@@ -22,16 +31,18 @@ if not secrets_file:
                 text=True,
             )
             result.check_returncode()
-            secrets = json.loads(result.stdout).get(pioenv)
+            secrets = json.loads(result.stdout.replace('\n','')).get(pioenv)
         except Exception as ex:
+            print(ex)
+            sleep(5)
             warnings.warn(
                 f"error while attempting to get secrets from 1Password CLI: {ex}"
             )
 
-        warnings.warn(
-            f"PIO_SECRETS_FILE_PATH environmental var not set and unable to get secret from 1password cli, falling back to secrets.json"
-        )
-        secrets_file = "secrets.json"
+            warnings.warn(
+                f"PIO_SECRETS_FILE_PATH environmental var not set and unable to get secret from 1password cli, falling back to secrets.json"
+            )
+            secrets_file = "secrets.json"
     try:
         if not secrets_file:
             pass

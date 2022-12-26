@@ -135,6 +135,9 @@ void callBack(const String &message) {
         } else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0) {
             desiredState.Effect = LightEffect::COMET;
 //            setupComet();
+        } else if (strcmp(jsonBuffer[c_STR_Effect], breathe) == 0) {
+            desiredState.Effect = LightEffect::BREATHE;
+            //            setupBreathe();
         }
     }
     if (jsonBuffer.containsKey(cs_Brightness)) {

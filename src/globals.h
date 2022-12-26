@@ -100,6 +100,8 @@ static RemoteDebug Debug;
 static const char *twinkle = "twinkle";
 static const char *solid = "solid";
 static const char *comet = "comet";
+static const char *breathe = "breathe";
+
 static const char *c_STR_Effect = "effect";
 static const char *c_STR_State = "state";
 static const char *transition = "transition";
@@ -115,6 +117,8 @@ const char *lightEffectToString(LightEffect &lightEffect) {
             return comet;
         case LightEffect::TWINKLE:
             return twinkle;
+        case LightEffect::BREATHE:
+            return breathe;
         default:
             return nullptr;
     }
