@@ -532,8 +532,8 @@ void RemoteDebug::handle() {
 			} else if (isPrintable(character)) {
 
 				// Concat
-
-				_command.concat(character);
+				
+				_command.concat(char(character));
 
 			}
 

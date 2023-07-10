@@ -1,3 +1,7 @@
+#ifndef HOMELED_REWRITE_BREATHE_H
+#define HOMELED_REWRITE_BREATHE_H
+#pragma once
+
 class BreatheEffect : public LightEffectType
 {
 protected:
@@ -57,3 +61,5 @@ bool BreatheEffect::handleDiff_step(State *targetState, State *presentState)
 
     return false;
 }
+
+#endif //HOMELED_REWRITE_BREATHE_H

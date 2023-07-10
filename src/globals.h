@@ -18,7 +18,9 @@
 //    byte brightness;
 //};
 
-
+#ifndef HOMELED_REWRITE_GLOBALS_H
+#define HOMELED_REWRITE_GLOBALS_H
+#pragma once
 #include "State.h"
 
 class LightEffectType {
@@ -30,10 +32,10 @@ public:
 };
 
 
-#define NUM_LEDS 300
-#define DATA_PIN 4
+#define NUM_LEDS 35 * 14
+// led pin for esp32 is D4
 #define LED_PIN 4
-#define CHIPSET WS2812
+#define CHIPSET WS2812B
 #define COLOR_ORDER GRB
 #define TIME_INCREMENT_SECONDS 10
 #define STATE_CHANGE_BUFFER_THRESHOLD_SECONDS 30
@@ -81,7 +83,7 @@ static State currentState;
 u_long g_timeIncrementSinceStateChange = 0;
 
 
-bool g_HasReceivedFirstMessage = false;
+bool g_HasReceivedFirstMessage = true;
 
 
 // DEBUG STUFF
@@ -90,7 +92,13 @@ bool g_HasReceivedFirstMessage = false;
 #include "RemoteDebug.h"
 
 static RemoteDebug Debug;
+#else
+#ifndef DEBUG_I
+#define DEBUG_I(...)
 #endif
+
+#endif
+
 
 #define ST(A) #A
 #define STR(A) ST(A)
@@ -135,3 +143,4 @@ void SetupGlobalVars() {
     g_HasReceivedFirstMessage = false;
 
 }
+#endif //HOMELED_REWRITE_GLOBALS_H

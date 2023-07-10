@@ -1,3 +1,7 @@
+#ifndef HOMELED_REWRITE_MQTT_COM_H
+#define HOMELED_REWRITE_MQTT_COM_H
+#pragma once
+
 #include "ArduinoJson.h"
 #include "EspMQTTClient.h"
 
@@ -9,77 +13,76 @@ const char *password = STR(WIFI_PASSWORD);
 
 #ifdef WIFI_SSID
 #ifdef DEBUGENABLE
-//#pragma message STR(WIFI_SSID)
+// #pragma message STR(WIFI_SSID)
 #endif
-const char *ssid = STR(WIFI_SSID);
+static const char *ssid = STR(WIFI_SSID);
 #endif
 
 #ifdef MQTT_SERVER
 // #pragma message STR(MQTT_SERVER)
-const char *mqtt_server = STR(MQTT_SERVER);
+static const char *mqtt_server = STR(MQTT_SERVER);
 #else
-#pragma error1 - Please supply mqtt server as build flag: MQTT_SERVER
+#pragma error1 - Please supply mqtt server as build flag : MQTT_SERVER
 #endif
 
 #ifdef MQTT_PORT
-const int mqtt_port = MQTT_PORT;
+static const int mqtt_port = MQTT_PORT;
 #else
 #pragma warning "Defaulting to mqtt port = 1883"
 const int mqtt_port = 1883;
 #endif
 
 #ifdef MQTT_USERNAME
-const char *mqtt_username = STR(MQTT_USERNAME);
+static const char *mqtt_username = STR(MQTT_USERNAME);
 #else
-const char *mqtt_username = "";
+static const char *mqtt_username = "";
 #endif
 
 #ifdef MQTT_PASSWORD
-const char *mqtt_password = STR(MQTT_PASSWORD);
+static const char *mqtt_password = STR(MQTT_PASSWORD);
 #else
-const char *mqtt_password = "";
+static const char *mqtt_password = "";
 #endif
 #ifndef MQTT_PREFIX
 #define MQTT_PREFIX "home"
 #endif
 
 #ifdef LIGHT_STATE_TOPIC
-const char *light_state_topic = STR(LIGHT_STATE_TOPIC);
+static const char *light_state_topic = STR(LIGHT_STATE_TOPIC);
 #endif
 #ifdef LIGHT_SET_TOPIC
-const char *light_set_topic = STR(LIGHT_SET_TOPIC); // "home/houselet_light1/set";
+static const char *light_set_topic = STR(LIGHT_SET_TOPIC); // "home/houselet_light1/set";
 #endif
 #ifdef LIGHT_SET_TOPIC_GROUP
-const char *light_set_topic_group = STR(LIGHT_SET_TOPIC_GROUP); // "home/LED_GROUP1/set";
+static const char *light_set_topic_group = STR(LIGHT_SET_TOPIC_GROUP); // "home/LED_GROUP1/set";
 #endif
 
-
 // ************ JSON ***//
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(10);
+static const int BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 
 EspMQTTClient client(
-        ssid,
-        password,
-        mqtt_server,
-        mqtt_username,
-        mqtt_password,
-        STR(SENSORNAME),
-        1883
-);
+    ssid,
+    password,
+    mqtt_server,
+    mqtt_username,
+    mqtt_password,
+    STR(SENSORNAME),
+    1883);
 
 static const char *on_cmd = "ON";
 static const char *off_cmd = "OFF";
 
-
-void initEspMQTT(EspMQTTClient *espClient) {
+void initEspMQTT(EspMQTTClient *espClient)
+{
     client.setWifiCredentials(ssid, password);
     client.setMqttServer(mqtt_server, mqtt_username, mqtt_password);
     client.setMqttClientName(STR(SENSORNAME));
-    // client.setOnConnectionEstablishedCallback(onConnectionEstablished);
-
+    client.setOnConnectionEstablishedCallback(onConnectionEstablished);
 }
 
-void sendState() {
+void sendState()
+{
+
     StaticJsonDocument<BUFFER_SIZE> root;
 
     root[c_STR_State] = (desiredState.powerStateOn) ? on_cmd : off_cmd;
@@ -91,101 +94,138 @@ void sendState() {
     root["brightness"] = desiredState.desiredBrightness;
     root["effect"] = lightEffectToString(desiredState.Effect);
     root["transition"] = g_TransitionDelay;
-
     char buffer[measureJson(root) + 1];
     serializeJson(root, buffer, sizeof(buffer));
     // Debug.printf("serialized json: %s \n", buffer);
     client.publish(light_state_topic, buffer, false);
-//   if (!success) {
+    //   if (!success) {
     // Debug.println("failed to publish state update");
     // }
 }
 
-void callBack(const String &message) {
+void callBack(const String &message)
+{
     DBG("callback triggered: \n %s", message.c_str());
-
 
     StaticJsonDocument<BUFFER_SIZE> jsonBuffer;
     auto error = ArduinoJson::deserializeJson(jsonBuffer, message, DeserializationOption::NestingLimit());
-    if (error) {
+    if (error)
+    {
         // Debug.print(F("deserializeJson() failed with code "));
         // Debug.println(error.c_str());
 
-         DBG("deserializeJson() failed with code %s", error.c_str());
+        DBG("deserializeJson() failed with code %s", error.c_str());
 
         return;
     }
     // assume a new message means a state change, let the diff handlers sort out the rest
     isTransitioning = true;
-    if (jsonBuffer.containsKey(c_STR_State)) {
-        if (strcmp(jsonBuffer[c_STR_State], on_cmd) == 0) {
+    // ON/OFF STATE
+    if (jsonBuffer.containsKey(c_STR_State))
+    {
+        if (strcmp(jsonBuffer[c_STR_State], on_cmd) == 0)
+        {
             desiredState.powerStateOn = true;
-//            currentState.powerStateOn = true;
-        } else if (strcmp(jsonBuffer[c_STR_State], off_cmd) == 0) {
+            //            currentState.powerStateOn = true;
+        }
+        else if (strcmp(jsonBuffer[c_STR_State], off_cmd) == 0)
+        {
             desiredState.powerStateOn = false;
         }
     }
-    if (jsonBuffer.containsKey(c_STR_Effect)) {
-        if (strcmp(jsonBuffer[c_STR_Effect], twinkle) == 0) {
+    // EFFECT
+    if (jsonBuffer.containsKey(c_STR_Effect))
+    {
+        if (strcmp(jsonBuffer[c_STR_Effect], twinkle) == 0)
+        {
             desiredState.Effect = LightEffect::TWINKLE;
-//            setupTwinkle();
-        } else if (strcmp(jsonBuffer[c_STR_Effect], solid) == 0) {
+            //            setupTwinkle();
+        }
+        else if (strcmp(jsonBuffer[c_STR_Effect], solid) == 0)
+        {
             desiredState.Effect = LightEffect::SOLID;
-//            setupSolid();
-        } else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0) {
+            //            setupSolid();
+        }
+        else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0)
+        {
             desiredState.Effect = LightEffect::COMET;
-//            setupComet();
-        } else if (strcmp(jsonBuffer[c_STR_Effect], breathe) == 0) {
+            //            setupComet();
+        }
+        else if (strcmp(jsonBuffer[c_STR_Effect], breathe) == 0)
+        {
             desiredState.Effect = LightEffect::BREATHE;
             //            setupBreathe();
         }
     }
-    if (jsonBuffer.containsKey(cs_Brightness)) {
+
+    // BRIGHNESS
+    if (jsonBuffer.containsKey(cs_Brightness))
+    {
         desiredState.setBrightness(jsonBuffer[cs_Brightness]);
-//        desiredState.desiredBrightness=jsonBuffer[cs_Brightness];
-//        auto mb = (float) calculate_max_brightness_for_power_mW(255, g_PowerLimit);
+        //        desiredState.desiredBrightness=jsonBuffer[cs_Brightness];
+        //        auto mb = (float) calculate_max_brightness_for_power_mW(255, g_PowerLimit);
 
-//        g_DesiredBrightness = jsonBuffer[cs_Brightness];
-//        desiredState.desiredBrightness = jsonBuffer[cs_Brightness];
+        //        g_DesiredBrightness = jsonBuffer[cs_Brightness];
+        //        desiredState.desiredBrightness = jsonBuffer[cs_Brightness];
         // Implement the real brightness value as a proportionate equivalent of the effective max brigntness level
-//        const byte newBrightness = uint8_t(((float) g_DesiredBrightness / (float) 255) * mb);
-//        desiredState.brightness = newBrightness;
-
-
-
-
+        //        const byte newBrightness = uint8_t(((float) g_DesiredBrightness / (float) 255) * mb);
+        //        desiredState.brightness = newBrightness;
     }
-    if (jsonBuffer.containsKey(transition)) {
-//        g_TransitionDelay = jsonBuffer[transition];
+
+    // TRANSITION DELAY
+    if (jsonBuffer.containsKey(transition))
+    {
+        //        g_TransitionDelay = jsonBuffer[transition];
         desiredState.speed = jsonBuffer[transition];
-//        refreshDelay();
+        //        refreshDelay();
     }
-    if (jsonBuffer.containsKey(c_STR_Color)) {
+
+    // COLOR (RGB)
+    if (jsonBuffer.containsKey(c_STR_Color))
+    {
         desiredState.red = jsonBuffer[c_STR_Color]["r"];
         desiredState.green = jsonBuffer[c_STR_Color]["g"];
         desiredState.blue = jsonBuffer[c_STR_Color]["b"];
     }
-//    if (stateChange) {
-//
-//        switch (effect) {
-//
-//            case SOLID:
-//                isTransitioning = true;
-//
-////                SetSolid(jsonBuffer[c_STR_Color]["r"], jsonBuffer[c_STR_Color]["g"], jsonBuffer[c_STR_Color]["b"], )
-////                setupSolid(true);
-//                break;
-//            case TWINKLE:
-//                setupTwinkle();
-//                break;
-//            case COMET:
-//                setupComet();
-//                break;
-//        }
-//    }
+
+    //
+
+
+
+    //    if (stateChange) {
+    //
+    //        switch (effect) {
+    //
+    //            case SOLID:
+    //                isTransitioning = true;
+    //
+    ////                SetSolid(jsonBuffer[c_STR_Color]["r"], jsonBuffer[c_STR_Color]["g"], jsonBuffer[c_STR_Color]["b"], )
+    ////                setupSolid(true);
+    //                break;
+    //            case TWINKLE:
+    //                setupTwinkle();
+    //                break;
+    //            case COMET:
+    //                setupComet();
+    //                break;
+    //        }
+    //    }
 
     if (!g_HasReceivedFirstMessage)
+    {
+        currentState = desiredState;
+        if (currentState.brightness == 0 && currentState.powerStateOn)
+            currentState.setBrightness(120);
+        else
+            currentState.setBrightness(desiredState.desiredBrightness);
+        if (currentState.blue == 0 && currentState.green == 0 && currentState.red == 0)
+        {
+            currentState.red = 255;
+            currentState.green = 255;
+            currentState.blue = 255;
+        }
         g_HasReceivedFirstMessage = true;
+    }
     g_timeIncrementSinceStateChange = 0;
     sendState();
 }
@@ -193,14 +233,21 @@ void callBack(const String &message) {
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
-void onConnectionEstablished() {
+#define SUB(x)  DBG("Subscribing to %s", x);    client.subscribe(x, callBack);    delay(1200);    // Let things settle 
+
+void onConnectionEstablished()
+{
 #ifdef DEBUGENABLE
     Debug.println("Connected");
 #endif
     client.subscribe(light_set_topic, callBack);
+    SUB(light_set_topic_group)
     // client.subscribe(light_set_topic_group, callBack);
     delay(1200);
     // Let things settle
+    
 }
 
 #pragma clang diagnostic pop
+
+#endif // HOMELED_REWRITE_MQTT_COM_H

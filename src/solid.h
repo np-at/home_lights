@@ -9,6 +9,9 @@
 //};
 //static SolidParams *solidParams;
 //
+#ifndef HOMELED_REWRITE_SOLID_H
+#define HOMELED_REWRITE_SOLID_H
+#pragma once
 
 class SolidEffect : public LightEffectType {
 protected:
@@ -101,6 +104,9 @@ void setupSolid(bool refresh = false) {
     refreshDelay();
 
 }
+
+#endif //HOMELED_REWRITE_SOLID_H
+
 
 
 //static const byte changeIncrement = 1;

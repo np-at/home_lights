@@ -4,6 +4,11 @@
 
 #ifndef HOMELED_REWRITE_STATE_H
 #define HOMELED_REWRITE_STATE_H
+#pragma once
+#include <Arduino.h>
+#include <FastLED.h>
+#include "power_mgt.h"
+
 
 #define MAX_POWER_LIMIT 22000
 enum LightEffect {

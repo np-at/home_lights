@@ -1,11 +1,11 @@
 //
 // Created by noahp on 6/11/22.
 //
+// #include <Arduino.h>
 
-#include <Arduino.h>
+#ifndef HOMELED_REWRITE_STATE_CPP
+#define HOMELED_REWRITE_STATE_CPP
 #include "State.h"
-#include "FastLED.h"
-#include "power_mgt.h"
 
 
 byte State::getCalculatedBrightness(int desiredPowerLimit) const {
@@ -25,3 +25,5 @@ void State::setBrightness(byte newDesiredBrightness) {
     brightness = getCalculatedBrightness(powerLimit);
 
 }
+
+#endif //HOMELED_REWRITE_STATE_CPP

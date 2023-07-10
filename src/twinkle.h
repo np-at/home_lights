@@ -11,12 +11,9 @@
 // History:     Sep-15-2020     davepl      Created
 //
 //---------------------------------------------------------------------------
-
-#include <Arduino.h>
-
-#define FASTLED_INTERNAL
-
-#include <FastLED.h>
+#ifndef TWINKLE_H
+#define TWINKLE_H
+#pragma once
 
 #define NUM_COLORS 5
 static const CRGB TwinkleColors[NUM_COLORS] = // NOLINT(cert-err58-cpp)
@@ -107,3 +104,4 @@ void TwinkleLightEffect::DrawEffect(State *state) {
     }
 }
 
+#endif //TWINKLE_H

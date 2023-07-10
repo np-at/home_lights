@@ -11,9 +11,10 @@
 // History:     Sep-28-2020     davepl      Created
 //
 //---------------------------------------------------------------------------
+#ifndef COMET_H
+#define COMET_H
+#pragma once
 
-#include <Arduino.h>
-#include <FastLED.h>
 
 #define NUM_COMETS 3
 struct COMET1 {
@@ -71,7 +72,7 @@ public:
 
     void DrawEffect(State *state) final;
 
-    boolean handleDiff_step(State *targetState, State *presentState) final;
+    boolean handleDiff_step(State* targetState, State* presentState) final;
 
 protected:
     COMET1 Comets[NUM_COMETS] = {
@@ -141,12 +142,15 @@ void CometLightEffect::DrawEffect(State *state) {
     }
 }
 
-boolean CometLightEffect::handleDiff_step(State *targetState, State *presentState) {
+boolean CometLightEffect::handleDiff_step(State* targetState, State* presentState) {
     g_DelayMultiplier = 0.35; // (float)30/(float)128;
     g_TransitionDelay = targetState->speed;
     refreshDelay();
 
-    *presentState = *targetState;
+    presentState = targetState;
     return false;
 }
 
+
+
+#endif //COMET_H
