@@ -6,7 +6,7 @@ c_cpp_properties.json
 CMakeLists.txt
 CMakeListsPrivate.txt
 
-
+secrets.json
 
 ### C++ template
 # Prerequisites
