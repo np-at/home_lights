@@ -1,4 +1,3 @@
-
 #ifndef FASTLED_INTERNAL
 #define FASTLED_INTERNAL
 #endif
@@ -11,8 +10,11 @@
 
 #include <FastLED.h>
 #include "globals.h"
-
+#include "utils.h"
 #include "hexlight.h"
+#include "HexlightCluster.h"
+static HexlightCluster cluster = HexlightCluster();
+
 #include "State.h"
 #include "solid.h"
 #include "breathe.h"
@@ -46,39 +48,7 @@ static SolidEffect *solidEffect;
 static TwinkleLightEffect *twinkleLightEffect;
 static CometLightEffect *cometLightEffect;
 static BreatheEffect *breatheEffect;
-static Hexlight HEX_LIGHTS[14] = {
-    Hexlight(0, 34, 0),
-    Hexlight(35, 69, 1),
-    Hexlight(70, 104, 1),
-    Hexlight(105, 139, 0),
-    Hexlight(140, 174, 4),
-    Hexlight(175, 209, 4),
-    Hexlight(210, 244, 4),
-    Hexlight(245, 279, 5),
-    Hexlight(280, 314, 1),
-    Hexlight(315, 349, 1),
-    Hexlight(uint16_t(350), uint16_t(384), uint8_t(1)),
-    Hexlight(uint16_t(385), uint16_t(419), uint8_t(5)),
-    Hexlight((uint16_t)420, uint16_t(454), uint8_t(4)),
-    Hexlight(uint16_t(455), uint16_t(489), uint8_t(4)),
 
-};
-void makePretty()
-{
-    // setInnerRing(CRGB::Red);
-    // setOuterRing(CRGB::Blue);
-    for (uint8_t i = 0; i < 14; i++)
-    {
-        HEX_LIGHTS[i].setOrder(0, true);
-        // HEX_LIGHTS[i].applyNormalizedColorMapping(pallete);
-        HEX_LIGHTS[i].setTopColors(CRGB::DarkOrange);
-        HEX_LIGHTS[i].setTopLeftColors(CRGB::Black);
-        HEX_LIGHTS[i].setTopRightColors(CRGB::Black);
-        HEX_LIGHTS[i].setBottomColors(CRGB::BlueViolet);
-        HEX_LIGHTS[i].setBottomLeftColors(CRGB::Green);
-        HEX_LIGHTS[i].setBottomRightColors(CRGB::Green);
-    }
-}
 void setup()
 {
     // Setup LEDs
@@ -107,7 +77,7 @@ void setup()
     currentState.blue = 144;
     currentState.red = 144;
     currentState.green = 144;
-    currentState.Effect = LightEffect::COMET;
+    currentState.Effect = LightEffect::RAINBOW;
     currentState.powerLimit = MAX_POWER_LIMIT;
     currentState.brightness = 255;
     currentState.powerStateOn = true;
@@ -119,9 +89,9 @@ void setup()
     desiredState.powerLimit = MAX_POWER_LIMIT;
 
     FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(g_LEDS, NUM_LEDS, 0); // Add our LED strip to the FastLED library
-    FastLED.setBrightness(100);
+    // FastLED.setBrightness(100);
     FastLED.showColor(CRGB::Black);
-    makePretty();
+    // makePretty();
     // set_max_power_indicator_LED(LED_BUILTIN);
 
     //    max_Brightness = calculate_max_brightness_for_power_mW(FastLED.leds(), NUM_LEDS, 255, MAX_POWER_LIMIT);
@@ -191,6 +161,7 @@ void setup()
     Debug.begin((String *)sensorName, RemoteDebug::DEBUG);
 
 #endif
+    cluster.setMode(MODES::TREE);
     //     while (g_HasReceivedFirstMessage == false)
     //     {
     //         client.loop();
@@ -227,37 +198,6 @@ const int innerRingIdx[4] = {4, 5, 8, 9};
 //      6       1
 //          0
 
-void setInnerRing(CRGB color)
-{
-    HEX_LIGHTS[4].setBottomLeftColors(color);
-    HEX_LIGHTS[4].setTopLeftColors(color);
-    HEX_LIGHTS[5].setTopColors(color);
-    HEX_LIGHTS[8].setTopRightColors(color);
-    HEX_LIGHTS[8].setBottomRightColors(color);
-    HEX_LIGHTS[9].setBottomColors(color);
-}
-void setOuterRing(CRGB color)
-{
-    HEX_LIGHTS[4].setBottomColors(color);
-    HEX_LIGHTS[4].setBottomRightColors(color);
-    HEX_LIGHTS[4].setTopRightColors(color);
-    HEX_LIGHTS[4].setTopColors(color);
-
-    HEX_LIGHTS[5].setBottomColors(color);
-    HEX_LIGHTS[5].setBottomRightColors(color);
-    HEX_LIGHTS[5].setBottomLeftColors(color);
-
-    HEX_LIGHTS[8].setBottomColors(color);
-    HEX_LIGHTS[8].setBottomColors(color);
-    HEX_LIGHTS[8].setBottomLeftColors(color);
-    HEX_LIGHTS[8].setTopLeftColors(color);
-    HEX_LIGHTS[8].setTopColors(color);
-
-    HEX_LIGHTS[9].setTopLeftColors(color);
-    HEX_LIGHTS[9].setTopColors(color);
-    HEX_LIGHTS[9].setTopRightColors(color);
-}
-
 
 // static const CRGB pallete[8] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Yellow, CRGB::Orange, CRGB::Purple, CRGB::White, CRGB::Black};
 static uint16_t idx = 0;
@@ -268,8 +208,11 @@ static bool stateDiff()
     if (currentState.brightness != desiredState.brightness)
         return true;
 }
+
 void loop()
 {
+    static uint16_t pos = 0;
+
     ArduinoOTA.handle();
     client.loop();
     // DBG("loop");
@@ -281,38 +224,89 @@ void loop()
     {
         FastLED.clear();
         FastLED.show();
-        delay(300);
     }
     else
     {
-        for (auto i = 0; i < 14; i++)
-        {
-            HEX_LIGHTS[i].stepHexlights<1000>();
-        }
-
-    
-        FastLED.show();
-
-        static bool flipFlop = false;
-        EVERY_N_SECONDS(10)
-        {
-            if (flipFlop)
-            {
-              
-                makePretty();
-
-            }
-            else
-            {
-                for (auto i = 0; i < 14; i++)
-                {
-                    HEX_LIGHTS[i].setAll(RainbowColors_p[random(0, 16)]);
-                }
-
-            }
-            flipFlop = !flipFlop;
-        }
+        cluster.loop();
     }
+    // else
+    // {
+    //     static uint8_t idx = 0;
+    //     static int8_t up = 1;
+    //     static CRGB color = CRGB::White;
+    //     static auto background_color = CRGB::Black;
+    //     // const auto white = CRGB::
+
+    //     EVERY_N_MILLIS(25)
+    //     {
+    //         // up = idx & 0b10010110;
+    //         // up = -1 * branchlessSignum(idx - (15 * 7));
+    //         // idx += up;
+    //         // if (idx > (15 * 7))
+    //         //     idx = 0;
+    //         if (idx == 0)
+    //         {
+    //             up = 1;
+    //             color = RainbowColors_p[random(0, 16)];
+    //         } // RainbowColors_p[random(0, 16)]
+    //         else if (idx >= 15 * 4)
+    //         {
+    //             up = -1;
+    //             color = RainbowColors_p[random(0, 16)];
+    //         }
+    //         idx += up;
+
+    //         for (auto i = 0; i < 14; i++)
+    //         {
+    //             HEX_LIGHTS[i].horizontalLightStep(idx - poo_offset[i], color, CRGB::Black);
+    //             HEX_LIGHTS[i].syncAll();
+    //         }
+    //     }
+    //     FastLED.show();
+    // }
+    // else
+    // {
+    //     for (auto i = 0; i < 14; i++)
+    //     {
+    //         HEX_LIGHTS[i].stepHexlights<50>();
+    //     }
+
+    //     FastLED.show();
+
+    //     static bool flipFlop = true;
+    //     if (flipFlop)
+    //     {
+    //         for (auto i = 0; i < 14; i++)
+    //         {
+    //             HEX_LIGHTS[i].setAll(CRGB::Black);
+    //             HEX_LIGHTS[i].syncAll();
+    //         }
+    //         pos += increment;
+    //         pos %= 360;
+    //         DBG("pos %d", pos);
+    //         for (auto i = 0; i < 14; i++)
+    //         {
+    //             HEX_LIGHTS[i].setLight(pos, CRGB::White);
+    //         }
+    //     }
+
+    //     EVERY_N_SECONDS(10)
+    //     {
+    //         if (flipFlop)
+    //         {
+
+    //             // makePretty();
+    //         }
+    //         else
+    //         {
+    //             for (auto i = 0; i < 14; i++)
+    //             {
+    //                 HEX_LIGHTS[i].setAll(RainbowColors_p[random(0, 16)]);
+    //             }
+    //         }
+    //         // flipFlop = !flipFlop;
+    //     }
+    // }
 
 #if defined(DEBUG_ENABLE)
 

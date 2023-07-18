@@ -54,6 +54,8 @@
     "stdexcept": "cpp",
     "cinttypes": "cpp",
     "cstdbool": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "ratio": "cpp",
+    "variant": "cpp"
   }
 }

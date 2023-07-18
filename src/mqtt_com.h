@@ -1,6 +1,5 @@
 #ifndef HOMELED_REWRITE_MQTT_COM_H
 #define HOMELED_REWRITE_MQTT_COM_H
-#pragma once
 
 #include "ArduinoJson.h"
 #include "EspMQTTClient.h"
@@ -92,7 +91,8 @@ void sendState()
     color["b"] = desiredState.blue;
 
     root["brightness"] = desiredState.desiredBrightness;
-    root["effect"] = lightEffectToString(desiredState.Effect);
+    // root["effect"] = lightEffectToString(desiredState.Effect);
+    modeToStr(cluster.getMode(), root["effect"]);
     root["transition"] = g_TransitionDelay;
     char buffer[measureJson(root) + 1];
     serializeJson(root, buffer, sizeof(buffer));
@@ -136,32 +136,52 @@ void callBack(const String &message)
     // EFFECT
     if (jsonBuffer.containsKey(c_STR_Effect))
     {
+        // DBG("effect message: %s", jsonBuffer[c_STR_Effect].as<char *>());
         if (strcmp(jsonBuffer[c_STR_Effect], twinkle) == 0)
         {
+            cluster.setMode(MODES::TREE);
             desiredState.Effect = LightEffect::TWINKLE;
             //            setupTwinkle();
         }
         else if (strcmp(jsonBuffer[c_STR_Effect], solid) == 0)
         {
+            cluster.setMode(MODES::SOLID_L);
             desiredState.Effect = LightEffect::SOLID;
             //            setupSolid();
         }
-        else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0)
+        else if (strcmp(jsonBuffer[c_STR_Effect], rainbow) == 0)
         {
-            desiredState.Effect = LightEffect::COMET;
-            //            setupComet();
+            cluster.setMode(MODES::SOLID_L);
+            desiredState.Effect = LightEffect::RAINBOW;
+            //            setupRainbow();
         }
-        else if (strcmp(jsonBuffer[c_STR_Effect], breathe) == 0)
-        {
-            desiredState.Effect = LightEffect::BREATHE;
-            //            setupBreathe();
+        else if (strcmp(jsonBuffer[c_STR_Effect], wave) == 0) {
+            cluster.setMode(MODES::HORIZONTAL);   
         }
+        // else
+        // {
+        //     DBG("unknown effect %s", jsonBuffer[c_STR_Effect].as<char *>());
+            
+        // }
+        
+        
+        // else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0)
+        // {
+        //     desiredState.Effect = LightEffect::COMET;
+        //     //            setupComet();
+        // }
+        // else if (strcmp(jsonBuffer[c_STR_Effect], breathe) == 0)
+        // {
+        //     desiredState.Effect = LightEffect::BREATHE;
+        //     //            setupBreathe();
+        // }
     }
 
-    // BRIGHNESS
+    // BRIGHTNESS
     if (jsonBuffer.containsKey(cs_Brightness))
     {
         desiredState.setBrightness(jsonBuffer[cs_Brightness]);
+        FastLED.setBrightness(desiredState.brightness);
         //        desiredState.desiredBrightness=jsonBuffer[cs_Brightness];
         //        auto mb = (float) calculate_max_brightness_for_power_mW(255, g_PowerLimit);
 
@@ -189,8 +209,6 @@ void callBack(const String &message)
     }
 
     //
-
-
 
     //    if (stateChange) {
     //
@@ -233,7 +251,10 @@ void callBack(const String &message)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
-#define SUB(x)  DBG("Subscribing to %s", x);    client.subscribe(x, callBack);    delay(1200);    // Let things settle 
+#define SUB(x)                     \
+    DBG("Subscribing to %s", x);   \
+    client.subscribe(x, callBack); \
+    delay(1200); // Let things settle
 
 void onConnectionEstablished()
 {
@@ -245,7 +266,6 @@ void onConnectionEstablished()
     // client.subscribe(light_set_topic_group, callBack);
     delay(1200);
     // Let things settle
-    
 }
 
 #pragma clang diagnostic pop

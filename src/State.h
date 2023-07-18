@@ -14,8 +14,7 @@
 enum LightEffect {
     SOLID,
     TWINKLE,
-    COMET,
-    BREATHE,
+    RAINBOW
 };
 
 class State {

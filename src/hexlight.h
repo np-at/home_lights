@@ -1,7 +1,26 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#include "utils.h"
+#pragma once
 
 #define LIGHT_LED_COUNT 35
+template <int... N>
+struct expand;
+
+template <int... N>
+struct expand<0, N...>
+{
+    constexpr static std::array<int, sizeof...(N) + 1> values = {{0, N...}};
+};
+
+template <int L, int... N>
+struct expand<L, N...> : expand<L - 1, L, N...>
+{
+};
+
+template <int... N>
+constexpr std::array<int, sizeof...(N) + 1> expand<0, N...>::values;
+
 static constexpr int BOTTOM_LEDS[5] = {0, 1, 2, 33, 34};
 static constexpr int BOTTOM_RIGHT_LEDS[6] = {3, 4, 5, 6, 7, 8};
 static constexpr int TOP_RIGHT_LEDS[6] = {9, 10, 11, 12, 13, 14};
@@ -9,7 +28,8 @@ static constexpr int TOP_LEDS[6] = {15, 16, 17, 18, 19, 20};
 static constexpr int TOP_LEFT_LEDS[6] = {21, 22, 23, 24, 25, 26};
 static constexpr int BOTTOM_LEFT_LEDS[6] = {27, 28, 29, 30, 31, 32};
 
-// static const int ALL_LEDS[5+6+6+6+6+6] = {0}; // initialize to all zeros
+// static constexpr int ALL_LEDS[]
+// initialize to all zeros
 
 // template <uint16_t Start,uint16_t End>
 // class Hexlight
@@ -20,20 +40,10 @@ static constexpr int BOTTOM_LEFT_LEDS[6] = {27, 28, 29, 30, 31, 32};
 //     static const int BOTTOM_LEDS[5] = {0, 1, 2, 33, 34};
 // };
 
-// branchless signum
-// see https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
-/**
- * Returns the sign of the given integer value, as an integer.
- * This implementation is branchless, meaning it avoids branching instructions
- * and is therefore faster than a traditional implementation using if/else statements.
- *
- * @param v The integer value to determine the sign of.
- * @return An integer representing the sign of the input value: -1 if v < 0, 0 if v == 0, and 1 if v > 0.
- */
-static inline int branchlessSignum(int v)
-{
-    return (v != 0) | -(int)((unsigned int)((int)v) >> (sizeof(int) * CHAR_BIT - 1));
-}
+// static inline int branchlessSignum_nonZero(int v)
+// {
+//     return (v != 0) | -(int)((unsigned int)((int)v) >> (sizeof(int) * CHAR_BIT - 1));
+// }
 
 template <uint16_t TRANSITION_PERIOD_MILLIS>
 static inline void diffColorStep(CRGB color, CRGB target)
@@ -45,7 +55,7 @@ static inline void diffColorStep(CRGB color, CRGB target)
         auto greenDiff = target.green - color.green;
         auto redDiff = target.r - color.r;
         color.blue += (branchlessSignum(blueDiff));
-        color.green += (branchlessSignum(greenDiff) );
+        color.green += (branchlessSignum(greenDiff));
         color.red += (branchlessSignum(redDiff));
     };
 
@@ -107,7 +117,7 @@ public:
      *
      * @return A boolean indicating whether any LED colors were changed during this step.
      */
-template <uint16_t TRANSITION_PERIOD_MILLIS>
+    template <uint16_t TRANSITION_PERIOD_MILLIS>
     bool stepHexlights()
     {
         auto changed = false;
@@ -118,7 +128,7 @@ template <uint16_t TRANSITION_PERIOD_MILLIS>
             auto target = this->hexLights[i];
             if (current != this->hexLights[i])
             {
-               
+
                 auto blueDiff = target.b - current.b;
                 FastLED.leds()[ledIdx].blue += branchlessSignum(blueDiff);
                 auto greenDiff = target.green - current.green;
@@ -137,6 +147,66 @@ template <uint16_t TRANSITION_PERIOD_MILLIS>
         }
         return changed;
     }
+
+    /**
+     * Synchronizes the color of the LED at the given index with its target color by incrementing or decrementing
+     * each color channel (red, green, blue) by 1, based on the difference between the current
+     * color and the target color.
+     *
+     * @param index The index of the LED to synchronize.
+     *
+     * @return A boolean indicating whether the LED color was changed during this step.
+     */
+    template <uint16_t STEP = 1>
+    bool syncLightIdxStep(uint16_t index)
+    {
+        auto ledIdx = this->normalizedOrder[index];
+        auto current = FastLED.leds()[ledIdx];
+        auto target = this->hexLights[index];
+        if (current != this->hexLights[index])
+        {
+            auto blueDiff = target.b - current.b;
+            FastLED.leds()[ledIdx].blue += (branchlessSignum(blueDiff) * STEP);
+       
+            auto greenDiff = target.green - current.green;
+            FastLED.leds()[ledIdx].green += ( branchlessSignum(greenDiff) * STEP);
+            auto redDiff = target.r - current.r;
+            FastLED.leds()[ledIdx].red += (branchlessSignum(redDiff) * STEP);
+            return true;
+        }
+        return false;
+    }
+
+    bool syncLightIdxStep(uint16_t index)
+    {
+        auto ledIdx = this->normalizedOrder[index];
+        auto current = FastLED.leds()[ledIdx];
+        auto target = this->hexLights[index];
+        if (current != this->hexLights[index])
+        {
+            auto blueDiff = target.b - current.b;
+            FastLED.leds()[ledIdx].blue += branchlessSignum(blueDiff);
+            auto greenDiff = target.green - current.green;
+            FastLED.leds()[ledIdx].green += branchlessSignum(greenDiff);
+            auto redDiff = target.r - current.r;
+            FastLED.leds()[ledIdx].red += branchlessSignum(redDiff);
+            return true;
+        }
+        return false;
+    }
+   
+    bool syncLightIdxHard(uint16_t index)
+    {
+        auto ledIdx = this->normalizedOrder[index];
+        auto target = this->hexLights[index];
+        if (FastLED.leds()[ledIdx] != target)
+        {
+            FastLED.leds()[ledIdx] = target;
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Sets the color of the top LEDs of the hexagon to the given color.
      *
@@ -286,7 +356,22 @@ template <uint16_t TRANSITION_PERIOD_MILLIS>
     Hexlight(uint16_t startIdx, uint16_t endIdx, uint8_t orientation);
     void setAll(CRGB color);
 
+    /**
+     * Synchronizes all hexlights to ensure that they display the same colors and brightness.
+     */
+    void syncAll();
+
+    void setLight(uint16_t angle, CRGB color, uint8_t brightness);
+
+    void setLight(uint16_t a, CRGB color);
+
     void setOrder(uint8_t rotation, bool useRandomness);
+
+    void horizontalLightStep(uint8_t pos, CRGB color, CRGB backgroundColor);
+
+    // void horizontalLightStep(uint8_t pos, CRGB color, uint8_t brightness);
+        void horizontalLightStep(uint8_t pos, CRGB color);
+
 
     bool sychronizeHexlights();
 
