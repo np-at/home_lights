@@ -60,27 +60,46 @@ static const char *light_set_topic_group = STR(LIGHT_SET_TOPIC_GROUP); // "home/
 static const int BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 
 EspMQTTClient client(
-    ssid,
-    password,
-    mqtt_server,
-    mqtt_username,
-    mqtt_password,
-    STR(SENSORNAME),
-    1883);
+        ssid,
+        password,
+        mqtt_server,
+        mqtt_username,
+        mqtt_password,
+        STR(SENSORNAME),
+        1883);
 
 static const char *on_cmd = "ON";
 static const char *off_cmd = "OFF";
 
-void initEspMQTT(EspMQTTClient *espClient)
-{
+inline const char *modeToStr(MODES mode) {
+    switch (mode) {
+        case MODES::NONE:
+            return none_l;
+        case MODES::SOLID_L:
+            return solid_l;
+        case HORIZONTAL:
+            return horizontal;
+        case MODES::TREE:
+            return tree;
+        case MODES::SWEEP:
+            return sweep;
+        case MODES::TWINKLE:
+            return twinkle;
+        default:
+            // return "INVALID";
+            DEBUG("invalid mode %d", mode);
+            return none_l;
+    }
+}
+
+void initEspMQTT(EspMQTTClient *espClient) {
     client.setWifiCredentials(ssid, password);
     client.setMqttServer(mqtt_server, mqtt_username, mqtt_password);
     client.setMqttClientName(STR(SENSORNAME));
     client.setOnConnectionEstablishedCallback(onConnectionEstablished);
 }
 
-void sendState()
-{
+void sendState() {
 
     StaticJsonDocument<BUFFER_SIZE> root;
 
@@ -91,80 +110,75 @@ void sendState()
     color["b"] = desiredState.blue;
 
     root["brightness"] = desiredState.desiredBrightness;
-    // root["effect"] = lightEffectToString(desiredState.Effect);
-    modeToStr(cluster.getMode(), root["effect"]);
+    root["effect"] = modeToStr(cluster.getMode());
     root["transition"] = g_TransitionDelay;
     char buffer[measureJson(root) + 1];
     serializeJson(root, buffer, sizeof(buffer));
     // Debug.printf("serialized json: %s \n", buffer);
-    client.publish(light_state_topic, buffer, false);
-    //   if (!success) {
-    // Debug.println("failed to publish state update");
-    // }
+    auto success = client.publish(light_state_topic, buffer, false);
+
+    if (!success) {
+        DEBUG("failed to publish state update");
+    }
 }
 
-void callBack(const String &message)
-{
-    DBG("callback triggered: \n %s", message.c_str());
+void callBack(const String &message) {
+    DEBUG("callback triggered: \n %s", message.c_str());
 
     StaticJsonDocument<BUFFER_SIZE> jsonBuffer;
     auto error = ArduinoJson::deserializeJson(jsonBuffer, message, DeserializationOption::NestingLimit());
-    if (error)
-    {
+    if (error) {
         // Debug.print(F("deserializeJson() failed with code "));
         // Debug.println(error.c_str());
 
-        DBG("deserializeJson() failed with code %s", error.c_str());
+        DEBUG("deserializeJson() failed with code %s", error.c_str());
 
         return;
     }
     // assume a new message means a state change, let the diff handlers sort out the rest
     isTransitioning = true;
     // ON/OFF STATE
-    if (jsonBuffer.containsKey(c_STR_State))
-    {
-        if (strcmp(jsonBuffer[c_STR_State], on_cmd) == 0)
-        {
+    if (jsonBuffer.containsKey(c_STR_State)) {
+        if (strcmp(jsonBuffer[c_STR_State], on_cmd) == 0) {
             desiredState.powerStateOn = true;
             //            currentState.powerStateOn = true;
-        }
-        else if (strcmp(jsonBuffer[c_STR_State], off_cmd) == 0)
-        {
+        } else if (strcmp(jsonBuffer[c_STR_State], off_cmd) == 0) {
             desiredState.powerStateOn = false;
         }
     }
     // EFFECT
-    if (jsonBuffer.containsKey(c_STR_Effect))
-    {
+    if (jsonBuffer.containsKey(c_STR_Effect)) {
         // DBG("effect message: %s", jsonBuffer[c_STR_Effect].as<char *>());
-        if (strcmp(jsonBuffer[c_STR_Effect], twinkle) == 0)
-        {
+        if (strcmp(jsonBuffer[c_STR_Effect], tree) == 0) {
             cluster.setMode(MODES::TREE);
-            desiredState.Effect = LightEffect::TWINKLE;
+            // desiredState.Effect = LightEffect::TWINKLE;
             //            setupTwinkle();
-        }
-        else if (strcmp(jsonBuffer[c_STR_Effect], solid) == 0)
-        {
+        } else if (strcmp(jsonBuffer[c_STR_Effect], solid) == 0) {
             cluster.setMode(MODES::SOLID_L);
-            desiredState.Effect = LightEffect::SOLID;
+            // desiredState.Effect = LightEffect::SOLID;
             //            setupSolid();
         }
-        else if (strcmp(jsonBuffer[c_STR_Effect], rainbow) == 0)
-        {
-            cluster.setMode(MODES::SOLID_L);
-            desiredState.Effect = LightEffect::RAINBOW;
-            //            setupRainbow();
-        }
-        else if (strcmp(jsonBuffer[c_STR_Effect], wave) == 0) {
-            cluster.setMode(MODES::HORIZONTAL);   
+            // else if (strcmp(jsonBuffer[c_STR_Effect], rainbow) == 0)
+            // {
+            //     cluster.setMode(MODES::SOLID_L);
+            //     // desiredState.Effect = LightEffect::RAINBOW;
+            //     //            setupRainbow();
+            // }
+        else if (strcmp(jsonBuffer[c_STR_Effect], horizontal) == 0) {
+            cluster.setMode(MODES::HORIZONTAL);
+        } else if (strcmp(jsonBuffer[c_STR_Effect], sweep) == 0) {
+            cluster.setMode(MODES::SWEEP);
+        } else if (strcmp(jsonBuffer[c_STR_Effect], none_l) == 0) {
+            cluster.setMode(MODES::NONE);
+        } else if (strcmp(jsonBuffer[c_STR_Effect], twinkle) == 0) {
+            cluster.setMode(MODES::TWINKLE);
         }
         // else
         // {
         //     DBG("unknown effect %s", jsonBuffer[c_STR_Effect].as<char *>());
-            
+
         // }
-        
-        
+
         // else if (strcmp(jsonBuffer[c_STR_Effect], comet) == 0)
         // {
         //     desiredState.Effect = LightEffect::COMET;
@@ -178,8 +192,7 @@ void callBack(const String &message)
     }
 
     // BRIGHTNESS
-    if (jsonBuffer.containsKey(cs_Brightness))
-    {
+    if (jsonBuffer.containsKey(cs_Brightness)) {
         desiredState.setBrightness(jsonBuffer[cs_Brightness]);
         FastLED.setBrightness(desiredState.brightness);
         //        desiredState.desiredBrightness=jsonBuffer[cs_Brightness];
@@ -193,19 +206,18 @@ void callBack(const String &message)
     }
 
     // TRANSITION DELAY
-    if (jsonBuffer.containsKey(transition))
-    {
+    if (jsonBuffer.containsKey(transition)) {
         //        g_TransitionDelay = jsonBuffer[transition];
         desiredState.speed = jsonBuffer[transition];
         //        refreshDelay();
     }
 
     // COLOR (RGB)
-    if (jsonBuffer.containsKey(c_STR_Color))
-    {
+    if (jsonBuffer.containsKey(c_STR_Color)) {
         desiredState.red = jsonBuffer[c_STR_Color]["r"];
         desiredState.green = jsonBuffer[c_STR_Color]["g"];
         desiredState.blue = jsonBuffer[c_STR_Color]["b"];
+        cluster.color = CRGB(desiredState.red, desiredState.green, desiredState.blue);
     }
 
     //
@@ -229,15 +241,13 @@ void callBack(const String &message)
     //        }
     //    }
 
-    if (!g_HasReceivedFirstMessage)
-    {
+    if (!g_HasReceivedFirstMessage) {
         currentState = desiredState;
         if (currentState.brightness == 0 && currentState.powerStateOn)
             currentState.setBrightness(120);
         else
             currentState.setBrightness(desiredState.desiredBrightness);
-        if (currentState.blue == 0 && currentState.green == 0 && currentState.red == 0)
-        {
+        if (currentState.blue == 0 && currentState.green == 0 && currentState.red == 0) {
             currentState.red = 255;
             currentState.green = 255;
             currentState.blue = 255;
@@ -252,12 +262,11 @@ void callBack(const String &message)
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 #define SUB(x)                     \
-    DBG("Subscribing to %s", x);   \
+    DEBUG("Subscribing to %s", x);   \
     client.subscribe(x, callBack); \
     delay(1200); // Let things settle
 
-void onConnectionEstablished()
-{
+void onConnectionEstablished() {
 #ifdef DEBUGENABLE
     Debug.println("Connected");
 #endif

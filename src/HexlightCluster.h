@@ -1,5 +1,9 @@
+#ifndef HexlightCluster_h
+#define HexlightCluster_h
 #include "hexlight.h"
-#pragma once
+
+#define HEXLIGHT_CLUSTER_SIZE 14
+// #pragma once
 // static HexlightCluster Cluster;
 
 enum MODES
@@ -8,32 +12,16 @@ enum MODES
     SOLID_L = 1,
     HORIZONTAL = 2,
     TREE = 3,
+    SWEEP = 4,
+    TWINKLE = 5,
 
 };
- void modeToStr(MODES mode, char *str)
-{
-    switch (mode)
-    {
-    case NONE:
-        strcpy(str, "NONE");
-        break;
-    case SOLID_L:
-        strcpy(str, "SOLID_L");
-        break;
-    case HORIZONTAL:
-        strcpy(str, "HORIZONTAL");
-        break;
-    case TREE:
-        strcpy(str, "TREE");
-        break;
-    default:
-        strcpy(str, "INVALID");
-        break;
-    }
-}
+
+// const char *modeToStr(MODES mode);
+const char *modeToStr(MODES mode);
 
 static constexpr uint8_t poo_offset[14] = {0, 7, 14, 28, 21, 14, 7, 14, 21, 28, 35, 42, 35, 28};
-static Hexlight *HEX_LIGHTS[14] = {
+static Hexlight *HEX_LIGHTS[HEXLIGHT_CLUSTER_SIZE] = {
     new Hexlight(0, 34, 0),
     new Hexlight(35, 69, 1),
     new Hexlight(70, 104, 1),
@@ -54,17 +42,19 @@ class HexlightCluster
 {
 private:
     MODES mode = NONE;
-    CRGB color = CRGB::White;
     bool horizontal_animation();
-    void makePretty();
+    static void makePretty();
     bool tree_animation();
-    bool solid_animation();
+    bool solid_animation() const;
+    bool sweep_animation(bool clockwise) const;
+    static bool twinkle_animation() ;
 
 public:
     HexlightCluster();
     ~HexlightCluster();
-    void setMode(MODES mode);
+    void setMode(MODES newMode);
     MODES getMode() { return mode; }
+    CRGB color = CRGB::White;
 
     /**
      * Returns a pointer to the Hexlight object at the specified index.
@@ -75,3 +65,4 @@ public:
     const Hexlight *getHexlight(uint16_t index);
     bool loop();
 };
+#endif

@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#ifndef HEXLIGHT_H
+#define HEXLIGHT_H
 #include "utils.h"
-#pragma once
 
 #define LIGHT_LED_COUNT 35
 template <int... N>
@@ -59,7 +60,7 @@ static inline void diffColorStep(CRGB color, CRGB target)
         color.red += (branchlessSignum(redDiff));
     };
 
-    return;
+
 }
 /**
  * Converts a CRGB color to a string representation.
@@ -90,8 +91,7 @@ private:
 
     // Represents the order of the LEDs after normalization, where the first LED is at the startIndex.
     // The order is determined by the orientation of the hexagon and is used to map colors to the LEDs.
-    uint16_t normalizedOrder[LIGHT_LED_COUNT];
-    CRGB hexLights[LIGHT_LED_COUNT];
+    uint16_t normalizedOrder[LIGHT_LED_COUNT]{};
     uint8_t rotationOffset;
 
     /**
@@ -110,6 +110,8 @@ private:
     //
 
 public:
+    CRGB hexLights[LIGHT_LED_COUNT]{};
+
     /**
      * Updates the colors of the hexagon's LEDs to be closer to their target colors by incrementing or decrementing
      * each color channel (red, green, blue) by 1, based on the difference between the current
@@ -167,9 +169,9 @@ public:
         {
             auto blueDiff = target.b - current.b;
             FastLED.leds()[ledIdx].blue += (branchlessSignum(blueDiff) * STEP);
-       
+
             auto greenDiff = target.green - current.green;
-            FastLED.leds()[ledIdx].green += ( branchlessSignum(greenDiff) * STEP);
+            FastLED.leds()[ledIdx].green += (branchlessSignum(greenDiff) * STEP);
             auto redDiff = target.r - current.r;
             FastLED.leds()[ledIdx].red += (branchlessSignum(redDiff) * STEP);
             return true;
@@ -194,7 +196,7 @@ public:
         }
         return false;
     }
-   
+
     bool syncLightIdxHard(uint16_t index)
     {
         auto ledIdx = this->normalizedOrder[index];
@@ -214,9 +216,9 @@ public:
      */
     void setTopColors(CRGB color)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i : TOP_LEDS)
         {
-            this->hexLights[TOP_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[TOP_LEDS[i]]] = color;
         }
     }
@@ -238,9 +240,9 @@ public:
      */
     void setBottomColors(CRGB color)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i : BOTTOM_LEDS)
         {
-            this->hexLights[BOTTOM_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[BOTTOM_LEDS[i]]] = color;
         }
     }
@@ -262,9 +264,9 @@ public:
      */
     void setBottomRightColors(CRGB color)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i : BOTTOM_RIGHT_LEDS)
         {
-            this->hexLights[BOTTOM_RIGHT_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[BOTTOM_RIGHT_LEDS[i]]] = color;
         }
     }
@@ -289,9 +291,9 @@ public:
      */
     void setTopRightColors(CRGB color)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i : TOP_RIGHT_LEDS)
         {
-            this->hexLights[TOP_RIGHT_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[TOP_RIGHT_LEDS[i]]] = color;
         }
     }
@@ -313,9 +315,9 @@ public:
     // @param color The color to set the LEDs to.
     void setTopLeftColors(CRGB color)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i : TOP_LEFT_LEDS)
         {
-            this->hexLights[TOP_LEFT_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[TOP_LEFT_LEDS[i]]] = color;
         }
     }
@@ -326,23 +328,24 @@ public:
      */
     void setTopLeftColors(CRGB *colors[6])
     {
-        for (auto i = 0; i < 6; i++)
-        {
-            this->hexLights[TOP_LEFT_LEDS[i]] = *colors[i];
+        for (auto i:TOP_LEFT_LEDS) {
+            this->hexLights[i] = *colors[i];
             // FastLED.leds()[this->normalizedOrder[TOP_LEFT_LEDS[i]]] = *colors[i];
+
         }
+
     }
     void setBottomLeftColors(CRGB color)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i : BOTTOM_LEFT_LEDS)
         {
-            this->hexLights[BOTTOM_LEFT_LEDS[i]] = color;
+            this->hexLights[i] = color;
             // FastLED.leds()[this->normalizedOrder[BOTTOM_LEFT_LEDS[i]]] = color;
         }
     }
     void setBottomLeftColors(CRGB *colors[6])
     {
-        for (auto i = 0; i < 6; i++)
+        for (auto i: BOTTOM_LEFT_LEDS)
         {
             this->hexLights[BOTTOM_LEFT_LEDS[i]] = *colors[i];
             // FastLED.leds()[this->normalizedOrder[BOTTOM_LEFT_LEDS[i]]] = *colors[i];
@@ -367,13 +370,16 @@ public:
 
     void setOrder(uint8_t rotation, bool useRandomness);
 
+    void waveLightStep(uint8_t pos, CRGB color, uint8_t rot);
+
     void horizontalLightStep(uint8_t pos, CRGB color, CRGB backgroundColor);
 
+    void shift(CRGB color);
+
     // void horizontalLightStep(uint8_t pos, CRGB color, uint8_t brightness);
-        void horizontalLightStep(uint8_t pos, CRGB color);
+    void horizontalLightStep(uint8_t pos, CRGB color);
 
-
-    bool sychronizeHexlights();
+    bool synchronizeHexlights();
 
     ~Hexlight();
 
@@ -402,3 +408,4 @@ static Hexlight CHexlight[14] = {
     Hexlight((uint16_t)420, uint16_t(454), uint8_t(4)),
     Hexlight(uint16_t(455), uint16_t(489), uint8_t(4)),
 };
+#endif

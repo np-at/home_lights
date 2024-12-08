@@ -11,15 +11,15 @@
 
 
 #define MAX_POWER_LIMIT 22000
-enum LightEffect {
-    SOLID,
-    TWINKLE,
-    RAINBOW
-};
+//enum LightEffect {
+//    SOLID,
+//    TWINKLE,
+//    RAINBOW
+//};
 
 class State {
 public:
-    LightEffect Effect{};
+//    LightEffect Effect{};
     boolean powerStateOn{};
     byte red{};
     byte green{};

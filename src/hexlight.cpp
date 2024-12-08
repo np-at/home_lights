@@ -11,9 +11,9 @@ Hexlight::Hexlight(uint16_t startIdx, uint16_t endIdx, uint8_t orientation)
 
 void Hexlight::setAll(CRGB color)
 {
-    for (auto i = 0; i < LIGHT_LED_COUNT; i++)
+    for (auto & hexLight : this->hexLights)
     {
-        this->hexLights[i] = color;
+        hexLight = color;
         // FastLED.leds()[this->normalizedOrder[i]] = color;
     }
 }
@@ -89,6 +89,115 @@ void Hexlight::setOrder(uint8_t rotation, bool useRandomness = false)
         break;
     }
 }
+void Hexlight::waveLightStep(uint8_t pos, CRGB color, uint8_t rot = 0)
+{
+    if (pos > 15)
+        return;
+    this->setLight((11 * pos) + rot, color);
+    this->setLight((-11 * pos) + rot, color);
+    // switch (pos)
+    // {
+    // case 0:
+    //     this->setLight(0 + rot, color);
+    //     break;
+    // case 1:
+    //     // this->setBottomColors(color);
+    //     this->setLight(11 + rot, color);
+    //     this->setLight(-11 + rot, color);
+    //     break;
+    // case 2:
+    //     // this->setBottomColors(black);
+    //     this->setLight(22 + rot, color);
+    //     this->setLight(-22 + rot, color);
+    //     break;
+    // case 3:
+    //     // this->setLight(22, black);
+    //     // this->setLight(-22, black);
+    //     this->setLight(33, color);
+    //     this->setLight(-33, color);
+    //     break;
+    // case 4:
+    //     // this->setLight(-33, black);
+    //     // this->setLight(33, black);
+    //     this->setLight(44, color);
+    //     this->setLight(-44, color);
+    //     break;
+    // case 5:
+    //     // this->setLight(44, black);
+    //     // this->setLight(-44, black);
+    //     this->setLight(55, color);
+    //     this->setLight(-55, color);
+    //     break;
+    // case 6:
+
+    //     // this->setLight(55, black);
+    //     // this->setLight(-55, black);
+    //     this->setLight(66, color);
+    //     this->setLight(-66, color);
+    //     break;
+    // case 7:
+    //     // this->setLight(66, black);
+    //     // this->setLight(-66, black);
+
+    //     this->setLight(77, color);
+    //     this->setLight(-77, color);
+    //     break;
+    // case 8:
+    //     // this->setLight(77, black);
+    //     // this->setLight(-77, black);
+    //     this->setLight(88, color);
+    //     this->setLight(-88, color);
+    //     break;
+    // case 9:
+    //     // this->setLight(88, black);
+    //     // this->setLight(-88, black);
+    //     this->setLight(99, color);
+    //     this->setLight(-99, color);
+    //     break;
+    // case 10:
+    //     // this->setLight(99, black);
+    //     // this->setLight(-99, black);
+    //     this->setLight(110, color);
+    //     this->setLight(-110, color);
+    //     break;
+    // case 11:
+    //     // this->setLight(110, black);
+    //     // this->setLight(-110, black);
+    //     this->setLight(121, color);
+    //     this->setLight(-121, color);
+    //     break;
+    // case 12:
+    //     // this->setLight(121, black);
+    //     // this->setLight(-121, black);
+    //     this->setLight(132, color);
+    //     this->setLight(-132, color);
+    //     break;
+    // case 13:
+    //     // this->setLight(132, black);
+    //     // this->setLight(-132, black);
+    //     this->setLight(143, color);
+    //     this->setLight(-143, color);
+    //     break;
+    // case 14:
+    //     // this->setLight(143, black);
+    //     // this->setLight(-143, black);
+    //     this->setLight(154, color);
+    //     this->setLight(-154, color);
+    //     break;
+    // case 15:
+    //     // this->setLight(154, black);
+    //     // this->setLight(-154, black);
+    //     // this->setTopColors(color);
+    //     this->setLight(165, color);
+    //     this->setLight(-165, color);
+    //     break;
+    // default:
+    //     // this->setAll(black);
+    //     // this->syncAll();
+    //     // pos = 0;
+    //     break;
+    // }
+}
 void Hexlight::horizontalLightStep(uint8_t pos, CRGB color, CRGB backgroundColor)
 {
 
@@ -97,122 +206,30 @@ void Hexlight::horizontalLightStep(uint8_t pos, CRGB color, CRGB backgroundColor
     // pos++;
     // if (pos > 32)
     //     pos = 0;
-     for (auto i = 0; i < LIGHT_LED_COUNT; i++)
+    for (auto & hexLight : this->hexLights)
     {
-        stepShift<5>(this->hexLights[i], backgroundColor);
+        stepShift<5>(hexLight, backgroundColor);
 
         // this->hexLights[i].fadeToBlackBy(20);
     }
     this->syncAll();
-    switch (pos)
+    this->waveLightStep(pos, color);
+}
+void Hexlight::shift(CRGB color)
+{
+    for (auto & hexLight : this->hexLights)
     {
-    case 0:
-        this->setLight(0, color);
-        break;
-    case 1:
-        // this->setBottomColors(color);
-        this->setLight(11, color);
-        this->setLight(-11, color);
-        break;
-    case 2:
-        // this->setBottomColors(black);
-        this->setLight(22, color);
-        this->setLight(-22, color);
-        break;
-    case 3:
-        // this->setLight(22, black);
-        // this->setLight(-22, black);
-        this->setLight(33, color);
-        this->setLight(-33, color);
-        break;
-    case 4:
-        // this->setLight(-33, black);
-        // this->setLight(33, black);
-        this->setLight(44, color);
-        this->setLight(-44, color);
-        break;
-    case 5:
-        // this->setLight(44, black);
-        // this->setLight(-44, black);
-        this->setLight(55, color);
-        this->setLight(-55, color);
-        break;
-    case 6:
+        stepShift<5>(hexLight, color);
 
-        // this->setLight(55, black);
-        // this->setLight(-55, black);
-        this->setLight(66, color);
-        this->setLight(-66, color);
-        break;
-    case 7:
-        // this->setLight(66, black);
-        // this->setLight(-66, black);
-
-        this->setLight(77, color);
-        this->setLight(-77, color);
-        break;
-    case 8:
-        // this->setLight(77, black);
-        // this->setLight(-77, black);
-        this->setLight(88, color);
-        this->setLight(-88, color);
-        break;
-    case 9:
-        // this->setLight(88, black);
-        // this->setLight(-88, black);
-        this->setLight(99, color);
-        this->setLight(-99, color);
-        break;
-    case 10:
-        // this->setLight(99, black);
-        // this->setLight(-99, black);
-        this->setLight(110, color);
-        this->setLight(-110, color);
-        break;
-    case 11:
-        // this->setLight(110, black);
-        // this->setLight(-110, black);
-        this->setLight(121, color);
-        this->setLight(-121, color);
-        break;
-    case 12:
-        // this->setLight(121, black);
-        // this->setLight(-121, black);
-        this->setLight(132, color);
-        this->setLight(-132, color);
-        break;
-    case 13:
-        // this->setLight(132, black);
-        // this->setLight(-132, black);
-        this->setLight(143, color);
-        this->setLight(-143, color);
-        break;
-    case 14:
-        // this->setLight(143, black);
-        // this->setLight(-143, black);
-        this->setLight(154, color);
-        this->setLight(-154, color);
-        break;
-    case 15:
-        // this->setLight(154, black);
-        // this->setLight(-154, black);
-        // this->setTopColors(color);
-        this->setLight(165, color);
-        this->setLight(-165, color);
-        break;
-    default:
-        // this->setAll(black);
-        // this->syncAll();
-        // pos = 0;
-        break;
+        // this->hexLights[i].fadeToBlackBy(20);
     }
-   
+    this->syncAll();
 }
 void Hexlight::horizontalLightStep(uint8_t pos, CRGB color)
 {
     this->horizontalLightStep(pos, color, CRGB::Black);
 }
-bool Hexlight::sychronizeHexlights()
+bool Hexlight::synchronizeHexlights()
 {
     auto changed = false;
     for (int i = 0; i < LIGHT_LED_COUNT; i++)
@@ -226,4 +243,4 @@ bool Hexlight::sychronizeHexlights()
     return changed;
 }
 
-Hexlight::~Hexlight(){};
+Hexlight::~Hexlight()= default;

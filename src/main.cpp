@@ -77,7 +77,7 @@ void setup()
     currentState.blue = 144;
     currentState.red = 144;
     currentState.green = 144;
-    currentState.Effect = LightEffect::RAINBOW;
+//    currentState.Effect = LightEffect::RAINBOW;
     currentState.powerLimit = MAX_POWER_LIMIT;
     currentState.brightness = 255;
     currentState.powerStateOn = true;
@@ -88,7 +88,7 @@ void setup()
 
     desiredState.powerLimit = MAX_POWER_LIMIT;
 
-    FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(g_LEDS, NUM_LEDS, 0); // Add our LED strip to the FastLED library
+    CFastLED::addLeds<WS2812B, LED_PIN, COLOR_ORDER>(g_LEDS, NUM_LEDS, 0); // Add our LED strip to the FastLED library
     // FastLED.setBrightness(100);
     FastLED.showColor(CRGB::Black);
     // makePretty();
@@ -145,7 +145,7 @@ void setup()
     {
         client.loop();
         delay(300);
-        DBG("waiting for client to connect before initializing ArduinoOTA");
+        DEBUG("waiting for client to connect before initializing ArduinoOTA");
     }
 
     ArduinoOTA.begin();

@@ -65,7 +65,7 @@ bool SolidEffect::handleDiff_step(State *targetState, State *presentState) {
     }
     const auto redDiff = (targetState->red - presentState->red);
     if (redDiff != 0) {
-        DBG("reddiff: %i \n", redDiff);
+        DEBUG("reddiff: %i \n", redDiff);
         targetState->red > presentState->red ? presentState->red += changeIncrement
                                              : presentState->red -= changeIncrement;
         changeCount++;
@@ -89,7 +89,7 @@ bool SolidEffect::handleDiff_step(State *targetState, State *presentState) {
 #ifdef DEBUGENABLE
     Debug.printf("diffstuff:\n brightness: %i vs %i", presentState->brightness, targetState->brightness);
 #endif
-    DBG("handling diff: b: %i \n", presentState->brightness);
+    DEBUG("handling diff: b: %i \n", presentState->brightness);
 
     return (changeCount > 0);
 }

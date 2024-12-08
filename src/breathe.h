@@ -34,7 +34,7 @@ void BreatheEffect::DrawEffect(State *state)
     hue = map(val, valueMin, valueMax, hueA, hueB); // Map hue based on current val
     sat = map(val, valueMin, valueMax, satA, satB); // Map sat based on current val
     // DBG("val: %f, hue: %i, sat: %i", val, hue, sat);
-    
+
     for (int i = 0; i < NUM_LEDS; i++)
     {
         g_LEDS[i] = CHSV(hue, sat, val);
@@ -52,7 +52,7 @@ void BreatheEffect::DrawEffect(State *state)
 }
 bool BreatheEffect::handleDiff_step(State *targetState, State *presentState)
 {
-    DBG("BreatheEffect::handleDiff_step");
+    DEBUG("BreatheEffect::handleDiff_step");
       g_DelayMultiplier = 0.35; // (float)30/(float)128;
     g_TransitionDelay = targetState->speed;
     refreshDelay();

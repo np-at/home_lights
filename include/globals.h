@@ -50,23 +50,23 @@ static boolean isTransitioning = false;
 
 
 
-#ifdef DEBUGENABLE
-#define DBG(fmt, ...) rdebugA(fmt, ##__VA_ARGS__)
-#else
-
-#define DBG(fmt, ...) #fmt // fmt
-#endif
+//#ifdef DEBUGENABLE
+//#define DBG(fmt, ...) rdebugA(fmt, ##__VA_ARGS__)
+//#else
+//
+//#define DBG(fmt, ...) #fmt // fmt
+//#endif
 // Taking 128 to be the "normal" rate, this is user controlled
-uint16_t g_TransitionDelay = 128;
+static uint16_t g_TransitionDelay = 128;
 
 // This will be modified by the different configs to interpret the user controlled g_TransitionDelay into the effective rate
-float g_DelayMultiplier = 1.00;
+static float g_DelayMultiplier = 1.00;
 
 // the calculated delay value, derived from g_DelayMultiplier * g_TransitionDelay
 // call refreshDelay when either parent changes
-uint16_t g_DelayValue = 120;
+static uint16_t g_DelayValue = 120;
 
-CRGB g_LEDS[NUM_LEDS];
+static CRGB g_LEDS[NUM_LEDS];
 
 // Runtime globals
 
@@ -80,10 +80,10 @@ static State currentState;
 
 
 // number of TIME_INCREMENT_SECONDS since state was last changed
-u_long g_timeIncrementSinceStateChange = 0;
+static u_long g_timeIncrementSinceStateChange = 0;
 
 
-bool g_HasReceivedFirstMessage = true;
+static bool g_HasReceivedFirstMessage = true;
 
 
 // DEBUG STUFF
@@ -111,6 +111,11 @@ static const char *rainbow = "rainbow";
 static const char *comet = "comet";
 static const char *breathe = "breathe";
 static const char *wave = "wave";
+static const char *none_l = "none";
+static const char *solid_l = "solid";
+static const char *horizontal = "horizontal";
+static const char *tree = "tree";
+static const char *sweep = "sweep";
 
 static const char *c_STR_Effect = "effect";
 static const char *c_STR_State = "state";
@@ -119,30 +124,30 @@ static const char *cs_Brightness = "brightness";
 static const char *c_STR_Color = "color";
 
 
-const char *lightEffectToString(LightEffect &lightEffect) {
-    switch (lightEffect) {
-        case LightEffect::SOLID:
-            return solid;
-        // case LightEffect::COMET:
-        //     return comet;
-        // case LightEffect::TWINKLE:
-        //     return twinkle;
-        // case LightEffect::BREATHE:
-        //     return breathe;
-        case LightEffect::RAINBOW:
-            return "rainbow";
-        default:
-            return nullptr;
-    }
-}
+// const char *lightEffectToString(LightEffect &lightEffect) {
+//     switch (lightEffect) {
+//         case LightEffect::SOLID:
+//             return solid;
+//         // case LightEffect::COMET:
+//         //     return comet;
+//         // case LightEffect::TWINKLE:
+//         //     return twinkle;
+//         // case LightEffect::BREATHE:
+//         //     return breathe;
+//         case LightEffect::RAINBOW:
+//             return "rainbow";
+//         default:
+//             return nullptr;
+//     }
+// }
 
-static LightEffect effect = LightEffect::SOLID;
+//static LightEffect effect = LightEffect::SOLID;
 
-void refreshDelay() {
+static void refreshDelay() {
     g_DelayValue = (uint16_t) ((float) g_TransitionDelay * g_DelayMultiplier);
 }
 
-void SetupGlobalVars() {
+static void SetupGlobalVars() {
     desiredState = State();
     g_HasReceivedFirstMessage = false;
 

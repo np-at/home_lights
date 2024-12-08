@@ -2,11 +2,11 @@
 //
 // NightDriver - (c) 2020 Dave Plummer.  All Rights Reserved.
 //
-// File:        
+// File:
 //
 // Description:
 //
-//   
+//
 //
 // History:     Sep-15-2020     davepl      Created
 //
@@ -76,7 +76,7 @@ boolean TwinkleLightEffect::handleDiff_step(State *targetState, State *presentSt
     auto changeCount = 0;
     g_DelayMultiplier = 0.4; // (float) 1 / (float) 10;
     refreshDelay();
-    
+
     if (targetState->powerStateOn != presentState->powerStateOn) {
         if (presentState->brightness > 0) {
             presentState->brightness--;
@@ -98,6 +98,7 @@ boolean TwinkleLightEffect::handleDiff_step(State *targetState, State *presentSt
 void TwinkleLightEffect::DrawEffect(State *state) {
     // Randomly fade the LEDs
     g_LEDS[random(NUM_LEDS)] = TwinkleColors[random(0, NUM_COLORS)];
+    DEBUG("twinkle called");
     for (int j = 0; j < FastLED.size(); j++) {
         if (random(10) > 5)
             FastLED.leds()[j] = FastLED.leds()[j].fadeToBlackBy(fadeAmt);
