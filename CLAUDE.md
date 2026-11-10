@@ -48,7 +48,7 @@ Feature flags:
   - Owns the `EspMQTTClient client`.
   - `onConnectionEstablished()` subscribes to `LIGHT_SET_TOPIC` and `LIGHT_SET_TOPIC_GROUP`, and publishes HA discovery when that flag is on.
   - `callBack()` parses JSON commands (`state` ON/OFF, `effect`, `brightness`, `color{r,g,b}`, `speed`). It changes `desiredState` / `cluster`, then `sendState()` publishes to `LIGHT_STATE_TOPIC`.
-  - `speed` (1..255, 128 = normal) sets the animation rate and is reported in state. HA's `transition` (seconds) is ignored; HA's UI can't set `speed`, so send it from an automation with `mqtt.publish`.
+  - `speed` (1..255, 128 = normal) sets the animation rate and is reported in state. HA's `transition` (seconds) is ignored. With `HA_DISCOVERY`, it also shows up as a "Speed" `number` entity on the device: a 0.1x–2x slider, where 1x = 128, using the light's own set and state topics.
 - `setup()` blocks until MQTT connects, then starts ArduinoOTA and RemoteDebug. That's why telnet answering means MQTT is up.
   - Anything that must happen before the first `client.loop()` goes above the connect loop: `setMaxPacketSize`, `enableLastWillMessage`, the initial `cluster.setMode`.
   - DEBUG output from inside the connect loop (including `onConnectionEstablished` on first connect) never reaches telnet.

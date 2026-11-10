@@ -151,6 +151,23 @@ void publishDiscovery() {
     for (uint8_t i = 0; i < HexlightCluster::effectCount(); i++) fx.add(HexlightCluster::effectName(i));
     light.createNestedArray("supported_color_modes").add("rgb");
 
+    // Speed slider on the same device, as a multiplier (1x = speed 128). Rides the light's own topics.
+    JsonObject spd = doc["cmps"].createNestedObject("speed");
+    spd["p"] = "number";
+    spd["unique_id"] = STR(SENSORNAME) "_speed";
+    spd["name"] = "Speed";
+    spd["command_topic"] = light_set_topic;
+    spd["command_template"] = "{\"speed\": {{ [[(value | float * 128) | round | int, 1] | max, 255] | min }} }";
+    spd["state_topic"] = light_state_topic;
+    spd["value_template"] = "{{ (value_json.speed / 128) | round(2) }}";
+    spd["availability_topic"] = availability_topic;
+    spd["min"] = 0.1;
+    spd["max"] = 2;
+    spd["step"] = 0.05;
+    spd["unit_of_measurement"] = "x";
+    spd["mode"] = "slider";
+    spd["entity_category"] = "config";
+
     String payload;
     serializeJson(doc, payload);
     DEBUG("HA discovery payload: %d bytes", payload.length());
