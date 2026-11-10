@@ -87,6 +87,7 @@ void setup()
     desiredState.green = 144;
 
     desiredState.powerLimit = MAX_POWER_LIMIT;
+    desiredState.desiredBrightness = 255; // was reported as 0 until a brightness command arrived
 
     CFastLED::addLeds<WS2812B, LED_PIN, COLOR_ORDER>(g_LEDS, NUM_LEDS, 0); // Add our LED strip to the FastLED library
     // FastLED.setBrightness(100);
@@ -138,7 +139,12 @@ void setup()
     randomSeed(analogRead(0));
     ArduinoOTA.setRebootOnSuccess(true);
 
+    cluster.setMode(MODES::TREE); // before MQTT connects, so the first reported state is right
     // SETUP mqtt
+#ifdef HA_DISCOVERY
+    client.setMaxPacketSize(1024); // discovery payload exceeds PubSubClient's 256-byte default
+    client.enableLastWillMessage(availability_topic, "offline", true); // must precede first client.loop()
+#endif
     // initEspMQTT(&client);
 
     while (!client.isConnected())
@@ -162,7 +168,6 @@ void setup()
     Debug.begin(&debugHost, RemoteDebug::DEBUG); // Start the debugger
 
 #endif
-    cluster.setMode(MODES::TREE);
     //     while (g_HasReceivedFirstMessage == false)
     //     {
     //         client.loop();

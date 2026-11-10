@@ -112,6 +112,9 @@ void sendState() {
     root["brightness"] = desiredState.desiredBrightness;
     root["effect"] = modeToStr(cluster.getMode());
     root["transition"] = g_TransitionDelay;
+#ifdef HA_DISCOVERY
+    root["color_mode"] = "rgb";
+#endif
     char buffer[measureJson(root) + 1];
     serializeJson(root, buffer, sizeof(buffer));
     // Debug.printf("serialized json: %s \n", buffer);
@@ -258,6 +261,44 @@ void callBack(const String &message) {
     sendState();
 }
 
+#ifdef HA_DISCOVERY
+#ifndef HA_DISCOVERY_PREFIX
+#define HA_DISCOVERY_PREFIX homeassistant
+#endif
+// Retained "online" on connect; broker publishes retained "offline" (last will) when we drop.
+static const char *availability_topic = STR(LIGHT_STATE_TOPIC) "/availability";
+// Home Assistant MQTT device discovery: https://www.home-assistant.io/integrations/mqtt/#device-discovery-payload
+// Retained, so HA picks it up whenever it (re)starts. Needs setMaxPacketSize() > payload size.
+void publishDiscovery() {
+    DynamicJsonDocument doc(1024);
+    JsonObject dev = doc.createNestedObject("dev");
+    dev["ids"] = STR(SENSORNAME);
+    dev["name"] = STR(DEVICE_NAME);
+    dev["mdl"] = "Hexlight";
+    doc["o"]["name"] = "homelights";
+
+    JsonObject light = doc.createNestedObject("cmps").createNestedObject("light");
+    light["p"] = "light";
+    light["unique_id"] = STR(SENSORNAME) "_light";
+    light["name"] = nullptr; // entity takes the device name
+    light["schema"] = "json";
+    light["command_topic"] = light_set_topic;
+    light["state_topic"] = light_state_topic;
+    light["availability_topic"] = availability_topic;
+    light["brightness"] = true;
+    light["effect"] = true;
+    JsonArray fx = light.createNestedArray("effect_list");
+    for (auto e : {tree, solid_l, horizontal, sweep, twinkle, none_l}) fx.add(e);
+    light.createNestedArray("supported_color_modes").add("rgb");
+
+    String payload;
+    serializeJson(doc, payload);
+    if (!client.publish(STR(HA_DISCOVERY_PREFIX) "/device/" STR(SENSORNAME) "/config", payload, true)) {
+        DEBUG("failed to publish HA discovery (%d bytes)", payload.length());
+    }
+}
+#endif
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
@@ -271,6 +312,11 @@ void onConnectionEstablished() {
     Debug.println("Connected");
 #endif
     client.subscribe(light_set_topic, callBack);
+#ifdef HA_DISCOVERY
+    publishDiscovery();
+    client.publish(availability_topic, "online", true);
+    sendState(); // give HA an initial state
+#endif
     SUB(light_set_topic_group)
     // client.subscribe(light_set_topic_group, callBack);
     delay(1200);
