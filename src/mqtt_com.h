@@ -42,9 +42,6 @@ static const char *light_set_topic = STR(LIGHT_SET_TOPIC); // "home/houselet_lig
 static const char *light_set_topic_group = STR(LIGHT_SET_TOPIC_GROUP); // "home/LED_GROUP1/set";
 #endif
 
-// Incoming strings are copied into the document (String input is read-only), so leave room for them.
-static const int BUFFER_SIZE = 384;
-
 EspMQTTClient client(
         ssid,
         password,
@@ -58,10 +55,10 @@ static const char *on_cmd = "ON";
 static const char *off_cmd = "OFF";
 
 void sendState() {
-    StaticJsonDocument<BUFFER_SIZE> root;
+    JsonDocument root;
 
     root[c_STR_State] = (desiredState.powerStateOn) ? on_cmd : off_cmd;
-    JsonObject color = root.createNestedObject("color");
+    JsonObject color = root["color"].to<JsonObject>();
     color["r"] = desiredState.red;
     color["g"] = desiredState.green;
     color["b"] = desiredState.blue;
@@ -82,36 +79,37 @@ void sendState() {
 void callBack(const String &message) {
     DEBUG("callback triggered: \n %s", message.c_str());
 
-    StaticJsonDocument<BUFFER_SIZE> jsonBuffer;
+    JsonDocument jsonBuffer;
     auto error = ArduinoJson::deserializeJson(jsonBuffer, message);
     if (error) {
         DEBUG("deserializeJson() failed with code %s", error.c_str());
         return;
     }
 
-    if (jsonBuffer.containsKey(c_STR_State)) {
-        if (strcmp(jsonBuffer[c_STR_State], on_cmd) == 0) {
+    // as<const char *>() is null when the value is missing or not a string
+    if (const char *st = jsonBuffer[c_STR_State].as<const char *>()) {
+        if (strcmp(st, on_cmd) == 0) {
             desiredState.powerStateOn = true;
-        } else if (strcmp(jsonBuffer[c_STR_State], off_cmd) == 0) {
+        } else if (strcmp(st, off_cmd) == 0) {
             desiredState.powerStateOn = false;
         }
     }
 
-    if (jsonBuffer.containsKey(c_STR_Effect) && !cluster.setMode(jsonBuffer[c_STR_Effect].as<const char *>())) {
+    if (!jsonBuffer[c_STR_Effect].isNull() && !cluster.setMode(jsonBuffer[c_STR_Effect].as<const char *>())) {
         DEBUG("unknown effect %s", jsonBuffer[c_STR_Effect].as<const char *>());
     }
 
-    if (jsonBuffer.containsKey(cs_Brightness)) {
+    if (jsonBuffer[cs_Brightness].is<int>()) {
         desiredState.brightness = jsonBuffer[cs_Brightness];
         FastLED.setBrightness(desiredState.brightness);
     }
 
     // "speed" sets the animation rate: 128 = normal, 255 = ~2x, 64 = half. HA's "transition" (seconds) is ignored.
-    if (jsonBuffer.containsKey(cs_Speed)) {
+    if (jsonBuffer[cs_Speed].is<int>()) {
         cluster.speed = constrain(jsonBuffer[cs_Speed].as<int>(), 1, 255);
     }
 
-    if (jsonBuffer.containsKey(c_STR_Color)) {
+    if (jsonBuffer[c_STR_Color].is<JsonObject>()) {
         desiredState.red = jsonBuffer[c_STR_Color]["r"];
         desiredState.green = jsonBuffer[c_STR_Color]["g"];
         desiredState.blue = jsonBuffer[c_STR_Color]["b"];
@@ -130,14 +128,14 @@ static const char *availability_topic = STR(LIGHT_STATE_TOPIC) "/availability";
 // Home Assistant MQTT device discovery: https://www.home-assistant.io/integrations/mqtt/#device-discovery-payload
 // Retained, so HA picks it up whenever it (re)starts. Needs setMaxPacketSize() > payload size.
 void publishDiscovery() {
-    DynamicJsonDocument doc(2048);
-    JsonObject dev = doc.createNestedObject("dev");
+    JsonDocument doc;
+    JsonObject dev = doc["dev"].to<JsonObject>();
     dev["ids"] = STR(SENSORNAME);
     dev["name"] = STR(DEVICE_NAME);
     dev["mdl"] = "Hexlight";
     doc["o"]["name"] = "homelights";
 
-    JsonObject light = doc.createNestedObject("cmps").createNestedObject("light");
+    JsonObject light = doc["cmps"]["light"].to<JsonObject>();
     light["p"] = "light";
     light["unique_id"] = STR(SENSORNAME) "_light";
     light["name"] = nullptr; // entity takes the device name
@@ -147,12 +145,12 @@ void publishDiscovery() {
     light["availability_topic"] = availability_topic;
     light["brightness"] = true;
     light["effect"] = true;
-    JsonArray fx = light.createNestedArray("effect_list");
+    JsonArray fx = light["effect_list"].to<JsonArray>();
     for (uint8_t i = 0; i < HexlightCluster::effectCount(); i++) fx.add(HexlightCluster::effectName(i));
-    light.createNestedArray("supported_color_modes").add("rgb");
+    light["supported_color_modes"].add("rgb");
 
     // Speed slider on the same device, as a multiplier (1x = speed 128). Rides the light's own topics.
-    JsonObject spd = doc["cmps"].createNestedObject("speed");
+    JsonObject spd = doc["cmps"]["speed"].to<JsonObject>();
     spd["p"] = "number";
     spd["unique_id"] = STR(SENSORNAME) "_speed";
     spd["name"] = "Speed";

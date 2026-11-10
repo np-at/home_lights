@@ -34,7 +34,9 @@ Feature flags:
 ## Dependency gotchas
 
 - **RemoteDebug**: use the patched copy in `lib/RemoteDebug`. Do *not* add `joaolopesf/RemoteDebug` to `lib_deps`; the registry 3.0.5 fails on ESP32 core 2.x (`hwcrypto/sha.h`). Its `begin()` takes a `String*`; pass a `static String`, never a cast `const char*`.
-- **FastLED is pinned to 3.6.0.** Newer versions move helpers into `fl::` and break `breathe.h`.
+- **Platform is pinned to `espressif32@6.13.0` (Arduino core 2.0.17).** Platform 7.0+ ships core 3.x, where EspMQTTClient 1.13.3 fails to compile: its ESP32 header includes `WiFiClient.h` but not `WiFi.h`.
+- Platform 6.13's esptool needs the `intelhex` Python module in PlatformIO's own Python. With Homebrew PlatformIO, run `$(brew --prefix platformio)/libexec/bin/python -m pip install intelhex`.
+- **ArduinoJson 7**: use `JsonDocument`, `doc[k].to<JsonObject>()` and `doc[k].is<T>()` / `.isNull()`. Avoid the deprecated `Static`/`DynamicJsonDocument`, `createNested*` and `containsKey`.
 - Source files use CRLF line endings. Keep them CRLF when editing, so diffs don't touch every line.
 
 ## Architecture
