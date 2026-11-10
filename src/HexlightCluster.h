@@ -3,66 +3,29 @@
 #include "hexlight.h"
 
 #define HEXLIGHT_CLUSTER_SIZE 14
-// #pragma once
-// static HexlightCluster Cluster;
 
-enum MODES
-{
-    NONE = 0,
-    SOLID_L = 1,
-    HORIZONTAL = 2,
-    TREE = 3,
-    SWEEP = 4,
-    TWINKLE = 5,
-
-};
-
-// const char *modeToStr(MODES mode);
-const char *modeToStr(MODES mode);
-
-static constexpr uint8_t poo_offset[14] = {0, 7, 14, 28, 21, 14, 7, 14, 21, 28, 35, 42, 35, 28};
-static Hexlight *HEX_LIGHTS[HEXLIGHT_CLUSTER_SIZE] = {
-    new Hexlight(0, 34, 0),
-    new Hexlight(35, 69, 1),
-    new Hexlight(70, 104, 1),
-    new Hexlight(105, 139, 0),
-    new Hexlight(140, 174, 4),
-    new Hexlight(175, 209, 4),
-    new Hexlight(210, 244, 4),
-    new Hexlight(245, 279, 5),
-    new Hexlight(280, 314, 1),
-    new Hexlight(315, 349, 1),
-    new Hexlight(uint16_t(350), uint16_t(384), (1)),
-    new Hexlight(uint16_t(385), uint16_t(419), uint8_t(5)),
-    new Hexlight((uint16_t)420, uint16_t(454), uint8_t(4)),
-    new Hexlight(uint16_t(455), uint16_t(489), uint8_t(4)),
-};
-
+// Owns the 14 panels and the effect table (HexlightCluster.cpp: EFFECTS[]). To add an effect, write an fx
+// function and add one row to EFFECTS; MQTT and Home Assistant discovery pick it up from there.
 class HexlightCluster
 {
-private:
-    MODES mode = NONE;
-    bool horizontal_animation();
-    static void makePretty();
-    bool tree_animation();
-    bool solid_animation() const;
-    bool sweep_animation(bool clockwise) const;
-    static bool twinkle_animation() ;
-
 public:
-    HexlightCluster();
-    ~HexlightCluster();
-    void setMode(MODES newMode);
-    MODES getMode() { return mode; }
     CRGB color = CRGB::White;
+    uint8_t speed = 128; // animation rate, 128 = normal; set by MQTT "speed"
 
-    /**
-     * Returns a pointer to the Hexlight object at the specified index.
-     *
-     * @param index The index of the Hexlight object to retrieve.
-     * @return A pointer to the Hexlight object at the specified index, or nullptr if the index is out of range.
-     */
-    const Hexlight *getHexlight(uint16_t index);
+    void begin();
+    bool setMode(const char *name); // false if no effect has that name
+    const char *effectName() const { return effectName(mode); }
+    static const char *effectName(uint8_t i);
+    static uint8_t effectCount();
+    // Renders a frame when one is due. Returns true if the effect changed itself (alert finished), so the
+    // caller should publish state.
     bool loop();
+
+private:
+    uint8_t mode = 0, prevMode = 0;
+    bool first = true;
+    uint32_t lastFrame = 0, vt = 0; // vt: effect time in ms, scaled by speed, 0 at mode start
+    uint16_t acc = 0;
+    void setMode(uint8_t m);
 };
 #endif
