@@ -89,7 +89,7 @@ static bool g_HasReceivedFirstMessage = true;
 // DEBUG STUFF
 #ifdef DEBUGENABLE
 
-#include "RemoteDebug.h"
+#include <RemoteDebug.h>
 
 static RemoteDebug Debug;
 #else

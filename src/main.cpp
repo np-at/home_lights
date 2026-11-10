@@ -9,7 +9,7 @@
 // #include "power_mgt.h"
 
 #include <FastLED.h>
-#include "globals.h"
+#include <globals.h>
 #include "utils.h"
 #include "hexlight.h"
 #include "HexlightCluster.h"
@@ -24,7 +24,7 @@ static HexlightCluster cluster = HexlightCluster();
 
 #include <ArduinoOTA.h>
 
-// #define DBG(fmt,...) if (DEBUGENABLE) DEBUG(fmt, ##__VA_ARGS__)
+#define DBG(fmt,...) if (DEBUGENABLE) DEBUG(fmt, ##__VA_ARGS__)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedMacroInspection"
 #define ST(A) #A
@@ -158,7 +158,8 @@ void setup()
 
     Debug.setResetCmdEnabled(true); // Enable the reset command
     Debug.showProfiler(true);       // To show profiler - time between messages of Debug
-    Debug.begin((String *)sensorName, RemoteDebug::DEBUG);
+    static String debugHost = sensorName; // begin() takes String*
+    Debug.begin(&debugHost, RemoteDebug::DEBUG); // Start the debugger
 
 #endif
     cluster.setMode(MODES::TREE);
